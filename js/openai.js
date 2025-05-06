@@ -98,12 +98,35 @@ async function compareWithQuranText(transcription) {
         const result = await response.json();
         const scoreText = result.choices[0].message.content.trim();
         
-        // Extract score (assuming the model returns just a number)
-        const score = parseFloat(scoreText);
+        // Extract score from the response text
+        // The model might return just a number, or it might include text
+        let score;
         
-        if (isNaN(score)) {
-            throw new Error('Invalid score returned from API');
+        // Try to extract a number from the response
+        const numberMatch = scoreText.match(/([0-9]*[.])?[0-9]+/);
+        if (numberMatch) {
+            score = parseFloat(numberMatch[0]);
+        } else {
+            // If no number found, make a best guess based on the text
+            if (scoreText.toLowerCase().includes('excellent') || 
+                scoreText.toLowerCase().includes('perfect')) {
+                score = 0.95;
+            } else if (scoreText.toLowerCase().includes('good')) {
+                score = 0.8;
+            } else if (scoreText.toLowerCase().includes('fair') || 
+                      scoreText.toLowerCase().includes('average')) {
+                score = 0.6;
+            } else if (scoreText.toLowerCase().includes('poor')) {
+                score = 0.4;
+            } else {
+                // Default fallback score
+                score = 0.5;
+                console.log('Using fallback score. API returned:', scoreText);
+            }
         }
+        
+        // Ensure score is between 0 and 1
+        score = Math.max(0, Math.min(1, score));
         
         // Update the score display
         updateScore(score);
