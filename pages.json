@@ -1,0 +1,9 @@
+{
+  "routes": [
+    {
+      "pattern": "/*",
+      "script": null,
+      "serve": "/index.html"
+    }
+  ]
+}
