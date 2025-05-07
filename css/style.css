@@ -92,6 +92,7 @@ header h2 {
     background-color: #f9f7e8;
     border-radius: 10px;
     border: 1px solid #e0e0e0;
+    position: relative;
 }
 
 .arabic-text {
@@ -558,18 +559,27 @@ header h2 {
 }
 
 
-.toggle-translation-box {
+.toggle-box {
     position: absolute;
-    top: 25px;
-    right: 25px;
-    background-color: #f9f9f9;
-    padding: 10px 15px;
-    border-radius: 8px;
+    background-color: #caa3a3;
+    padding: 5px 5px;
+    border-radius: 4px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     font-family: sans-serif;
     font-size: 14px;
     z-index: 1000;
 }
+
+.bottom-right {
+    bottom: 20px;
+    right: 25px;
+}
+
+.bottom-right-transliteration {
+    bottom: 60px;
+    right: 20px;
+}
+
 
 .toggle-translation-box input[type="checkbox"] {
     margin-right: 8px;

@@ -194,17 +194,25 @@ function useWebSpeechAPI(text) {
 }
 
 function toggleTranslation(){
-const isHidden = translation.style.display === "none" && transliteration.style.display === "none"; 
+const isHidden = translation.style.display === "none"; 
         if(isHidden){
             translation.style.display = "block";
-            transliteration.style.display = "block";    
         }else{
             translation.style.display = "none";
-            transliteration.style.display = "none";    
         }
         toggleTranslationBtn.textContent = isHidden ? "Hide Translation" : "Show Translation";    
-
     }
+
+function toggleTransliteration(){
+    const isHidden = transliteration.style.display === "none"; 
+        if(isHidden){
+            transliteration.style.display = "block";
+        }else{
+            transliteration.style.display = "none";
+        }
+        toggleTransliterationBtn.textContent = isHidden ? "Hide transliteration" : "Show transliteration";    
+}
+    
 /**
  * Toggle recording state
  */
