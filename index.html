@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Allah Intelligence - Quran Teaching Tool</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/quiz.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -37,6 +38,9 @@
                             <button id="nextBtn" class="control-btn">
                                 <i class="fas fa-forward"></i> Next Verse
                             </button>
+                            <button id="quizModeBtn" class="control-btn accent-btn">
+                                <i class="fas fa-question-circle"></i> Quiz Mode
+                            </button>
                         </div>
                     </div>
                     
@@ -59,14 +63,6 @@
                         <h3 class="section-title"><i class="fas fa-headphones"></i> What AI Heard</h3>
                         <div id="recognitionText" class="recognition-text"></div>
                     </div>
-                    
-                    <div class="results-card">
-                        <h3 class="section-title"><i class="fas fa-chart-bar"></i> Your Score</h3>
-                        <div class="score-display">
-                            <div id="scoreValue">0</div>
-                        </div>
-                        <div class="feedback" id="feedback"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -88,6 +84,79 @@
             </div>
         </div>
 
+        <!-- Quiz Section -->
+        <div id="quizContainer" class="quiz-container hidden">
+            <div class="quiz-header">
+                <h2><i class="fas fa-question-circle"></i> Quran Quiz</h2>
+                <button id="closeQuizBtn" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="quizSetup" class="quiz-setup">
+                <h3>Select Quiz Type</h3>
+                <div class="quiz-type-selector">
+                    <div class="quiz-type-option">
+                        <input type="radio" id="writingQuiz" name="quizType" value="writing" checked>
+                        <label for="writingQuiz">Writing</label>
+                    </div>
+                    <div class="quiz-type-option">
+                        <input type="radio" id="speakingQuiz" name="quizType" value="speaking">
+                        <label for="speakingQuiz">Speaking</label>
+                    </div>
+                    <div class="quiz-type-option">
+                        <input type="radio" id="meaningQuiz" name="quizType" value="meaning">
+                        <label for="meaningQuiz">Meaning</label>
+                    </div>
+                </div>
+                
+                <p id="quizTypeDescription" class="quiz-type-description">
+                    Fill in the missing words in Quranic verses to test your writing skills.
+                </p>
+                
+                <div class="quiz-difficulty">
+                    <label for="quizDifficultyLevel">Difficulty Level:</label>
+                    <select id="quizDifficultyLevel">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                
+                <button id="startQuizBtn" class="start-quiz-btn">
+                    <i class="fas fa-play"></i> Start Quiz
+                </button>
+            </div>
+            
+            <div id="quizArea" class="quiz-area hidden">
+                <div class="quiz-progress-bar">
+                    <span id="quizProgress">Question 1 of 5</span>
+                    <div class="quiz-score-display">
+                        Score: <span id="quizScore">0</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question-container">
+                    <div id="quizQuestion" class="quiz-question arabic-text"></div>
+                    <div id="quizTransliteration" class="quiz-transliteration"></div>
+                    <div id="quizTranslation" class="quiz-translation"></div>
+                </div>
+                
+                <div id="quizAnswerContainer" class="quiz-answer-container">
+                    <!-- Answer inputs will be dynamically added here -->
+                </div>
+                
+                <div id="quizFeedback" class="quiz-feedback"></div>
+                
+                <div class="quiz-buttons">
+                    <button id="submitAnswerBtn" class="quiz-btn primary-btn">
+                        <i class="fas fa-check"></i> Submit Answer
+                    </button>
+                    <button id="nextQuestionBtn" class="quiz-btn hidden">
+                        <i class="fas fa-arrow-right"></i> Next Question
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         <footer>
             <p>Allah Intelligence &copy; 2025 | A Quran Teaching Tool</p>
         </footer>
@@ -97,5 +166,6 @@
     <script src="js/quranData.js"></script>
     <script src="js/speechRecognition.js"></script>
     <script src="js/openai.js"></script>
+    <script src="js/quiz.js"></script>
 </body>
 </html>

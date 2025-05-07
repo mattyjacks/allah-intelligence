@@ -22,14 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextBtn = document.getElementById('nextBtn');
     const recordBtn = document.getElementById('recordBtn');
     const playRecordingBtn = document.getElementById('playRecordingBtn');
+    const quizModeBtn = document.getElementById('quizModeBtn');
     
     // Display elements
     const quranText = document.getElementById('quranText');
     const transliteration = document.getElementById('transliteration');
     const translation = document.getElementById('translation');
-    const scoreValue = document.getElementById('scoreValue');
     const feedback = document.getElementById('feedback');
     const recordingStatus = document.getElementById('recordingStatus');
+    
+    // Quiz elements
+    const quizContainer = document.getElementById('quizContainer');
+    const closeQuizBtn = document.getElementById('closeQuizBtn');
+    const quizDifficultyLevel = document.getElementById('quizDifficultyLevel');
     
     // Settings elements
     const difficultyLevel = document.getElementById('difficultyLevel');
@@ -48,9 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
     recordBtn.addEventListener('click', toggleRecording);
     playRecordingBtn.addEventListener('click', playRecordedAudio);
     
+    // Quiz mode toggle
+    quizModeBtn.addEventListener('click', toggleQuizMode);
+    closeQuizBtn.addEventListener('click', toggleQuizMode);
+    
+    // Sync difficulty levels between main app and quiz
     difficultyLevel.addEventListener('change', (e) => {
         currentDifficulty = e.target.value;
+        quizDifficultyLevel.value = currentDifficulty;
         loadNextQuranText();
+    });
+    
+    quizDifficultyLevel.addEventListener('change', (e) => {
+        currentDifficulty = e.target.value;
+        difficultyLevel.value = currentDifficulty;
     });
     
     saveApiKeyBtn.addEventListener('click', () => {
@@ -96,18 +112,9 @@ function setMode(mode) {
  * Load the next Quran text based on current mode and difficulty
  */
 function loadNextQuranText() {
-    // Reset current score
-    currentScore = 0;
-    document.getElementById('scoreValue').textContent = currentScore;
     
-    // Clear feedback
-    document.getElementById('feedback').textContent = '';
-    document.getElementById('feedback').className = 'feedback';
-    
-    // Get random Quran text from quranData.js
     currentQuranText = getRandomQuranText(currentDifficulty);
     
-    // Display the text based on current mode
     if (currentMode === 'arabic') {
         document.getElementById('quranText').textContent = currentQuranText.arabic;
         document.getElementById('transliteration').textContent = currentQuranText.transliteration;
@@ -221,20 +228,30 @@ function showFeedback(message, type) {
 }
 
 /**
- * Update the score display
+ * Toggle the quiz mode on and off
  */
-function updateScore(score) {
-    currentScore = Math.round(score * 100);
-    document.getElementById('scoreValue').textContent = currentScore;
+function toggleQuizMode() {
+    const quizContainer = document.getElementById('quizContainer');
+    const mainContent = document.querySelector('.main-content');
     
-    // Show appropriate feedback based on score
-    if (currentScore >= 90) {
-        showFeedback('Excellent pronunciation!', 'success');
-    } else if (currentScore >= 70) {
-        showFeedback('Good pronunciation. Keep practicing!', 'success');
-    } else if (currentScore >= 50) {
-        showFeedback('Fair pronunciation. Try again to improve.', 'warning');
+    // Toggle visibility
+    quizContainer.classList.toggle('hidden');
+    
+    // If quiz is now visible, hide main content and vice versa
+    if (!quizContainer.classList.contains('hidden')) {
+        // Show quiz and hide main content
+        mainContent.style.display = 'none';
+        
+        // Sync difficulty level with main app
+        document.getElementById('quizDifficultyLevel').value = currentDifficulty;
+        
+        // Reset quiz UI if needed
+        if (document.getElementById('quizArea').classList.contains('hidden') === false) {
+            document.getElementById('quizArea').classList.add('hidden');
+            document.getElementById('quizSetup').classList.remove('hidden');
+        }
     } else {
-        showFeedback('Needs improvement. Listen to the audio and try again.', 'error');
+        // Show main content
+        mainContent.style.display = 'flex';
     }
 }
