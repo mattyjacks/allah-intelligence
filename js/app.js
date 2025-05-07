@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const recordBtn = document.getElementById('recordBtn');
     const playRecordingBtn = document.getElementById('playRecordingBtn');
     const quizModeBtn = document.getElementById('quizModeBtn');
+    const toggleTranslationBtn = document.getElementById("toggleTranslationBtn");
     
     // Display elements
     const quranText = document.getElementById('quranText');
@@ -192,6 +193,18 @@ function useWebSpeechAPI(text) {
     window.speechSynthesis.speak(utterance);
 }
 
+function toggleTranslation(){
+const isHidden = translation.style.display === "none" && transliteration.style.display === "none"; 
+        if(isHidden){
+            translation.style.display = "block";
+            transliteration.style.display = "block";    
+        }else{
+            translation.style.display = "none";
+            transliteration.style.display = "none";    
+        }
+        toggleTranslationBtn.textContent = isHidden ? "Hide Translation" : "Show Translation";    
+
+    }
 /**
  * Toggle recording state
  */
@@ -255,3 +268,4 @@ function toggleQuizMode() {
         mainContent.style.display = 'flex';
     }
 }
+

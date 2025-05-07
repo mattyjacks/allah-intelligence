@@ -82,6 +82,7 @@ header h2 {
     padding: 20px;
     margin-bottom: 20px;
     gap: 25px;
+    position: relative;
 }
 
 .quran-display {
@@ -554,6 +555,24 @@ header h2 {
     font-size: 0.9rem;
     transition: all 0.3s ease;
     margin-top: 10px;
+}
+
+
+.toggle-translation-box {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background-color: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: sans-serif;
+    font-size: 14px;
+    z-index: 1000;
+}
+
+.toggle-translation-box input[type="checkbox"] {
+    margin-right: 8px;
 }
 
 .small-btn:hover {
