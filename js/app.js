@@ -100,6 +100,7 @@ function initApp() {
  */
 function setMode(mode) {
     currentMode = mode;
+    updateToggleControlsVisibility();
     
     // Update UI
     document.getElementById('arabicModeBtn').classList.toggle('active', mode === 'arabic');
@@ -194,7 +195,7 @@ function useWebSpeechAPI(text) {
 }
 
 function toggleTranslation(){
-const isHidden = translation.style.display === "none"; 
+const isHidden = translation.style.display === "none" && currentMode === "arabic"; 
         if(isHidden){
             translation.style.display = "block";
         }else{
@@ -204,13 +205,18 @@ const isHidden = translation.style.display === "none";
     }
 
 function toggleTransliteration(){
-    const isHidden = transliteration.style.display === "none"; 
+    const isHidden = transliteration.style.display === "none" && currentMode === "arabic"; 
         if(isHidden){
             transliteration.style.display = "block";
         }else{
             transliteration.style.display = "none";
         }
         toggleTransliterationBtn.textContent = isHidden ? "Hide transliteration" : "Show transliteration";    
+}
+
+function updateToggleControlsVisibility() {
+    const controls = document.getElementById("toggleControls");
+    controls.style.display = currentMode === "arabic" ? "block" : "none";
 }
     
 /**

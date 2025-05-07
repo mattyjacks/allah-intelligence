@@ -25,14 +25,17 @@
                 <div id="quranText" class="arabic-text"></div>
                 <div id="transliteration" class="transliteration"></div>
                 <div id="translation" class="translation"></div>
-                <div class="toggle-box bottom-right">
-                    <input type="checkbox" id="toggleTranslationBtn" onclick="toggleTranslation()" checked>
-                    <label for="toggleTranslationBtn">Show Translation</label>
+                <div id="toggleControls">
+                    <div class="toggle-box bottom-right">
+                        <input type="checkbox" id="toggleTranslationBtn" onclick="toggleTranslation()" checked>
+                        <label for="toggleTranslationBtn">Show Translation</label>
+                    </div>
+                    <div class="toggle-box bottom-right-transliteration">
+                        <input type="checkbox" id="toggleTransliterationBtn" onclick="toggleTransliteration()" checked>
+                        <label for="toggleTransliterationBtn">Show transliteration</label>
+                    </div>
                 </div>
-                <div class="toggle-box bottom-right-transliteration">
-                    <input type="checkbox" id="toggleTransliterationBtn" onclick="toggleTransliteration()" checked>
-                    <label for="toggleTransliterationBtn">Show transliteration</label>
-                </div>
+               
             </div>
 
             <div class="interaction-area">
