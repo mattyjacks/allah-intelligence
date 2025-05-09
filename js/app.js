@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const quranText = document.getElementById('quranText');
     const transliteration = document.getElementById('transliteration');
     const translation = document.getElementById('translation');
-    const feedback = document.getElementById('feedback');
+    const apiKeyFeedback = document.getElementById('apiKeyFeedback');
     const recordingStatus = document.getElementById('recordingStatus');
     
     // Quiz elements
@@ -310,7 +310,7 @@ function toggleRecording() {
  * Display feedback to the user
  */
 function showFeedback(message, type) {
-    const feedback = document.getElementById('feedback');
+    const feedback = document.getElementById('apiKeyFeedback');
     feedback.textContent = message;
     feedback.className = 'feedback';
     

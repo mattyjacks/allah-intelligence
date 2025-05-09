@@ -127,10 +127,6 @@ async function compareWithQuranText(transcription) {
         
         // Ensure score is between 0 and 1
         score = Math.max(0, Math.min(1, score));
-        
-        // Update the score display
-        updateScore(score);
-        
     } catch (error) {
         console.error('OpenAI API Error:', error);
         showFeedback('Error: ' + error.message, 'error');
