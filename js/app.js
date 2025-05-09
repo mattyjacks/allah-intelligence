@@ -365,10 +365,17 @@ function showFeedback(message, type) {
 
 /**
  * Toggle the quiz mode on and off
+ * @param {Event} event - The event that triggered this function
  */
-function toggleQuizMode() {
+function toggleQuizMode(event) {
     const quizContainer = document.getElementById('quizContainer');
     const mainContent = document.querySelector('.main-content');
+    
+    // Check if we're already in quiz mode and the quiz mode button was clicked
+    if (event && event.currentTarget.id === 'quizModeBtn' && !quizContainer.classList.contains('hidden')) {
+        // Already in quiz mode and quiz button clicked, do nothing
+        return;
+    }
     
     // Toggle visibility
     quizContainer.classList.toggle('hidden');
