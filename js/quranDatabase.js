@@ -1,10 +1,248 @@
 /**
  * Allah Intelligence - Quran Teaching Tool
- * Complete Quran Database Module
+ * Complete Quran Database Module with Structured Learning Curriculum
  */
 
 // Complete Quran database with all chapters (surahs) and verses (ayahs)
 const quranDatabase = {
+  // Structured learning curriculum
+  curriculum: {
+    // Learning paths organized by themes and progressive difficulty
+    paths: [
+      {
+        id: 1,
+        name: "Fundamentals of Faith",
+        description: "Learn the basic verses about Islamic faith and belief in Allah",
+        levels: [
+          {
+            id: 1,
+            name: "Level 1: Introduction",
+            description: "Basic verses about Allah and faith",
+            verses: [
+              { surahNumber: 1, ayah: 1 }, // Al-Fatihah:1
+              { surahNumber: 1, ayah: 2 }, // Al-Fatihah:2
+              { surahNumber: 112, ayah: 1 }, // Al-Ikhlas:1
+              { surahNumber: 112, ayah: 2 } // Al-Ikhlas:2
+            ],
+            unlocked: true
+          },
+          {
+            id: 2,
+            name: "Level 2: Deepening Faith",
+            description: "Verses about the attributes of Allah",
+            verses: [
+              { surahNumber: 112, ayah: 3 }, // Al-Ikhlas:3
+              { surahNumber: 112, ayah: 4 }, // Al-Ikhlas:4
+              { surahNumber: 2, ayah: 255 } // Ayatul Kursi (partial)
+            ],
+            unlocked: false
+          },
+          {
+            id: 3,
+            name: "Level 3: Advanced Concepts",
+            description: "Deeper understanding of faith and belief",
+            verses: [
+              { surahNumber: 2, ayah: 285 }, // Al-Baqarah:285
+              { surahNumber: 2, ayah: 286 }, // Al-Baqarah:286
+              { surahNumber: 3, ayah: 190 } // Ali 'Imran:190
+            ],
+            unlocked: false
+          }
+        ],
+        progress: 0,
+        completed: false
+      },
+      {
+        id: 2,
+        name: "Daily Prayers",
+        description: "Verses commonly recited in daily prayers",
+        levels: [
+          {
+            id: 1,
+            name: "Level 1: Essential Recitations",
+            description: "Verses recited in every prayer",
+            verses: [
+              { surahNumber: 1, ayah: 1 }, // Al-Fatihah:1
+              { surahNumber: 1, ayah: 2 }, // Al-Fatihah:2
+              { surahNumber: 1, ayah: 3 }, // Al-Fatihah:3
+              { surahNumber: 1, ayah: 4 } // Al-Fatihah:4
+            ],
+            unlocked: true
+          },
+          {
+            id: 2,
+            name: "Level 2: Short Surahs",
+            description: "Short surahs commonly recited in prayers",
+            verses: [
+              { surahNumber: 112, ayah: 1 }, // Al-Ikhlas:1
+              { surahNumber: 112, ayah: 2 }, // Al-Ikhlas:2
+              { surahNumber: 112, ayah: 3 }, // Al-Ikhlas:3
+              { surahNumber: 112, ayah: 4 } // Al-Ikhlas:4
+            ],
+            unlocked: false
+          },
+          {
+            id: 3,
+            name: "Level 3: Prayer Supplications",
+            description: "Supplications recited during different parts of prayer",
+            verses: [
+              { surahNumber: 3, ayah: 8 }, // Ali 'Imran:8
+              { surahNumber: 3, ayah: 16 }, // Ali 'Imran:16
+              { surahNumber: 3, ayah: 17 } // Ali 'Imran:17
+            ],
+            unlocked: false
+          }
+        ],
+        progress: 0,
+        completed: false
+      },
+      {
+        id: 3,
+        name: "Moral Teachings",
+        description: "Verses about ethics, morality and good conduct",
+        levels: [
+          {
+            id: 1,
+            name: "Level 1: Basic Ethics",
+            description: "Fundamental moral teachings",
+            verses: [
+              { surahNumber: 17, ayah: 23 }, // Al-Isra:23 (Respect for parents)
+              { surahNumber: 17, ayah: 32 }, // Al-Isra:32 (Avoiding immorality)
+              { surahNumber: 17, ayah: 35 } // Al-Isra:35 (Honesty in dealings)
+            ],
+            unlocked: true
+          },
+          {
+            id: 2,
+            name: "Level 2: Social Conduct",
+            description: "Verses about social interactions",
+            verses: [
+              { surahNumber: 49, ayah: 11 }, // Al-Hujurat:11 (Avoiding mockery)
+              { surahNumber: 49, ayah: 12 }, // Al-Hujurat:12 (Avoiding suspicion)
+              { surahNumber: 16, ayah: 90 } // An-Nahl:90 (Justice and good conduct)
+            ],
+            unlocked: false
+          },
+          {
+            id: 3,
+            name: "Level 3: Advanced Morality",
+            description: "Deeper moral concepts",
+            verses: [
+              { surahNumber: 41, ayah: 34 }, // Fussilat:34 (Responding to evil with good)
+              { surahNumber: 3, ayah: 134 }, // Ali 'Imran:134 (Controlling anger)
+              { surahNumber: 3, ayah: 159 } // Ali 'Imran:159 (Gentleness)
+            ],
+            unlocked: false
+          }
+        ],
+        progress: 0,
+        completed: false
+      }
+    ],
+    
+    // User's current learning state
+    currentPathId: 1,
+    currentLevelId: 1,
+    currentVerseIndex: 0,
+    
+    // Get the current verse in the learning path
+    getCurrentVerse: function() {
+      const path = this.getPath(this.currentPathId);
+      const level = this.getLevel(path, this.currentLevelId);
+      
+      if (!level || !level.verses || level.verses.length === 0) {
+        return null;
+      }
+      
+      const verseRef = level.verses[this.currentVerseIndex];
+      return quranDatabase.getVerseByReference(verseRef.surahNumber, verseRef.ayah);
+    },
+    
+    // Move to the next verse in the curriculum
+    nextVerse: function() {
+      const path = this.getPath(this.currentPathId);
+      const level = this.getLevel(path, this.currentLevelId);
+      
+      if (!level || !level.verses) {
+        return null;
+      }
+      
+      // Move to next verse in current level
+      if (this.currentVerseIndex < level.verses.length - 1) {
+        this.currentVerseIndex++;
+        return this.getCurrentVerse();
+      }
+      
+      // If we've completed all verses in this level, try to move to next level
+      const nextLevel = this.getLevel(path, this.currentLevelId + 1);
+      if (nextLevel) {
+        // Unlock the next level
+        nextLevel.unlocked = true;
+        this.currentLevelId++;
+        this.currentVerseIndex = 0;
+        return this.getCurrentVerse();
+      }
+      
+      // If we've completed all levels in this path, try to move to next path
+      const nextPathIndex = path.id;
+      const nextPath = this.getPath(nextPathIndex + 1);
+      if (nextPath) {
+        // Mark current path as completed and move to next path
+        path.completed = true;
+        path.progress = 100;
+        this.currentPathId = nextPath.id;
+        this.currentLevelId = 1;
+        this.currentVerseIndex = 0;
+        return this.getCurrentVerse();
+      }
+      
+      // If we've completed all paths, return the last verse
+      return this.getCurrentVerse();
+    },
+    
+    // Get a specific learning path by ID
+    getPath: function(pathId) {
+      return this.paths.find(p => p.id === pathId);
+    },
+    
+    // Get a specific level within a path
+    getLevel: function(path, levelId) {
+      if (!path || !path.levels) {
+        return null;
+      }
+      return path.levels.find(l => l.id === levelId);
+    },
+    
+    // Get all unlocked levels for a path
+    getUnlockedLevels: function(pathId) {
+      const path = this.getPath(pathId);
+      if (!path || !path.levels) {
+        return [];
+      }
+      return path.levels.filter(level => level.unlocked);
+    },
+    
+    // Calculate and update progress for a path
+    updatePathProgress: function(pathId) {
+      const path = this.getPath(pathId);
+      if (!path || !path.levels) {
+        return 0;
+      }
+      
+      const totalLevels = path.levels.length;
+      const completedLevels = path.levels.filter(level => level.completed).length;
+      const currentLevel = this.getLevel(path, this.currentLevelId);
+      
+      let currentLevelProgress = 0;
+      if (currentLevel && currentLevel.verses && currentLevel.verses.length > 0) {
+        currentLevelProgress = (this.currentVerseIndex / currentLevel.verses.length) * (1 / totalLevels) * 100;
+      }
+      
+      path.progress = (completedLevels / totalLevels * 100) + currentLevelProgress;
+      return path.progress;
+    }
+  },
+  
   // Metadata about each surah (chapter)
   surahs: [
     { number: 1, name: "Al-Fatihah", nameArabic: "الفاتحة", englishName: "The Opening", versesCount: 7, revelationType: "Meccan" },
@@ -206,6 +444,31 @@ const quranDatabase = {
   // Function to get a specific surah by number
   getSurah: function(surahNumber) {
     return this.surahs.find(surah => surah.number === surahNumber);
+  },
+  
+  // Function to get a specific verse by surah number and ayah number
+  getVerseByReference: function(surahNumber, ayahNumber) {
+    // First check in beginner verses
+    let verse = this.verses.beginner.find(v => v.surahNumber === surahNumber && v.ayah === ayahNumber);
+    if (verse) return verse;
+    
+    // Then check intermediate verses
+    verse = this.verses.intermediate.find(v => v.surahNumber === surahNumber && v.ayah === ayahNumber);
+    if (verse) return verse;
+    
+    // Finally check advanced verses
+    verse = this.verses.advanced.find(v => v.surahNumber === surahNumber && v.ayah === ayahNumber);
+    if (verse) return verse;
+    
+    // If not found, return a placeholder verse
+    return {
+      arabic: "Verse not found in database",
+      transliteration: "Verse not found",
+      translation: "This verse is not yet in our database. We're working on adding more verses.",
+      surah: this.getSurah(surahNumber)?.name || "Unknown Surah",
+      surahNumber: surahNumber,
+      ayah: ayahNumber
+    };
   },
   
   // Function to get all verses from a specific difficulty level
