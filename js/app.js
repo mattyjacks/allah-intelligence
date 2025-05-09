@@ -130,6 +130,21 @@ function setMode(mode) {
     document.getElementById('arabicModeBtn').classList.toggle('active', mode === 'arabic');
     document.getElementById('englishModeBtn').classList.toggle('active', mode === 'english');
     
+    // Hide Quiz mode if it's visible
+    const quizContainer = document.getElementById('quizContainer');
+    if (!quizContainer.classList.contains('hidden')) {
+        quizContainer.classList.add('hidden');
+        
+        // Show main content since we're exiting quiz mode
+        document.querySelector('.main-content').style.display = 'flex';
+    }
+    
+    // Hide Curriculum panel if it's visible
+    const curriculumPanel = document.getElementById('curriculumPanel');
+    if (!curriculumPanel.classList.contains('hidden')) {
+        curriculumPanel.classList.add('hidden');
+    }
+    
     // Reload text with new mode
     loadNextQuranText();
 }
