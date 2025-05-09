@@ -200,12 +200,14 @@ function loadNextQuestion() {
         return;
     }
     
+    // Get tajweed settings
+    const showTajweed = localStorage.getItem('showTajweed') !== 'false';
+    
     // Get current question
     const question = currentQuiz.questions[currentQuiz.currentQuestionIndex];
     
     // Update progress indicator
-    document.getElementById('quizProgress').textContent = 
-        `Question ${currentQuiz.currentQuestionIndex + 1} of ${currentQuiz.questions.length}`;
+    document.getElementById('quizProgress').textContent = `Question ${currentQuiz.currentQuestionIndex + 1} of ${currentQuiz.questions.length}`;
     
     // Reset UI elements
     document.getElementById('quizFeedback').textContent = '';
@@ -216,29 +218,42 @@ function loadNextQuestion() {
     const answerContainer = document.getElementById('quizAnswerContainer');
     answerContainer.innerHTML = '';
     
-    // Display question based on type
-    document.getElementById('quizQuestion').textContent = question.questionText;
+    // Apply Tajweed highlighting if enabled
+    if (showTajweed && window.tajweedModule && question.type !== QUIZ_TYPES.MEANING) {
+        document.getElementById('quizQuestion').innerHTML = window.tajweedModule.applyTajweedHighlighting(question.questionText, false);
+    } else {
+        document.getElementById('quizQuestion').textContent = question.questionText;
+    }
+    
     document.getElementById('quizTransliteration').textContent = question.transliteration || '';
     document.getElementById('quizTranslation').textContent = question.translation || '';
     
-    // Setup answer interface based on quiz type
-    setupAnswerInterface(question);
-    
-    // Update toggle controls visibility based on quiz type
-    updateQuizToggleControlsVisibility();
+    // Update progress display
+    document.getElementById('quizProgress').textContent = `Question ${currentQuiz.currentQuestionIndex + 1} of ${currentQuiz.questions.length}`;
     
     // Show submit button and hide next button
     document.getElementById('submitAnswerBtn').classList.remove('hidden');
     document.getElementById('nextQuestionBtn').classList.add('hidden');
-}
-
-/**
- * Setup the answer interface based on question type
- * @param {Object} question - The current question
- */
-function setupAnswerInterface(question) {
-    const answerContainer = document.getElementById('quizAnswerContainer');
     
+    // Clear any previous feedback
+    document.getElementById('quizFeedback').innerHTML = '';
+    
+    // Add Tajweed toggle if it doesn't exist and we're in a relevant quiz type
+    if (question.type !== QUIZ_TYPES.MEANING && !document.getElementById('quizTajweedToggle')) {
+        const toggleControls = document.getElementById('quizToggleControls');
+        const tajweedToggle = document.createElement('div');
+        tajweedToggle.className = 'toggle-box quiz-toggle-right-tajweed';
+        tajweedToggle.innerHTML = `
+            <input type="checkbox" id="quizTajweedToggle" ${showTajweed ? 'checked' : ''}>
+            <label for="quizTajweedToggle">Show Tajweed rules</label>
+        `;
+        toggleControls.appendChild(tajweedToggle);
+        
+        // Add event listener for Tajweed toggle
+        document.getElementById('quizTajweedToggle').addEventListener('change', toggleQuizTajweed);
+    }
+    
+    // Setup interface based on question type
     switch(question.type) {
         case QUIZ_TYPES.WRITING:
             // Create input fields for each blank
@@ -492,7 +507,13 @@ async function processQuizAudioWithOpenAI(audioBlob, question) {
  */
 async function compareQuizRecitation(transcription, question) {
     try {
-        // Prepare request to OpenAI API for comparison
+        // Show processing feedback
+        showQuizFeedback('Analyzing your recitation...', '');
+        
+        let score = 0.5; // Default score
+        let tajweedAnalysis = null;
+        
+        // First, get basic pronunciation score
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -516,41 +537,55 @@ async function compareQuizRecitation(transcription, question) {
             })
         });
         
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || 'Error comparing texts');
+        if (response.ok) {
+            // Get comparison result
+            const result = await response.json();
+            const scoreText = result.choices[0].message.content.trim();
+            
+            // Extract score from the response text
+            const numberMatch = scoreText.match(/([0-9]*[.])?[0-9]+/);
+            
+            if (numberMatch) {
+                score = parseFloat(numberMatch[0]);
+            } else {
+                // If no number found, make a best guess based on the text
+                if (scoreText.toLowerCase().includes('excellent') || 
+                    scoreText.toLowerCase().includes('perfect')) {
+                    score = 0.95;
+                } else if (scoreText.toLowerCase().includes('good')) {
+                    score = 0.8;
+                } else if (scoreText.toLowerCase().includes('fair') || 
+                          scoreText.toLowerCase().includes('average')) {
+                    score = 0.6;
+                } else if (scoreText.toLowerCase().includes('poor')) {
+                    score = 0.4;
+                } else {
+                    // Default fallback score
+                    score = 0.5;
+                }
+            }
+            
+            // Ensure score is between 0 and 1
+            score = Math.max(0, Math.min(1, score));
         }
         
-        // Get comparison result
-        const result = await response.json();
-        const scoreText = result.choices[0].message.content.trim();
-        
-        // Extract score from the response text
-        let score;
-        const numberMatch = scoreText.match(/([0-9]*[.])?[0-9]+/);
-        
-        if (numberMatch) {
-            score = parseFloat(numberMatch[0]);
-        } else {
-            // If no number found, make a best guess based on the text
-            if (scoreText.toLowerCase().includes('excellent') || 
-                scoreText.toLowerCase().includes('perfect')) {
-                score = 0.95;
-            } else if (scoreText.toLowerCase().includes('good')) {
-                score = 0.8;
-            } else if (scoreText.toLowerCase().includes('fair') || 
-                      scoreText.toLowerCase().includes('average')) {
-                score = 0.6;
-            } else if (scoreText.toLowerCase().includes('poor')) {
-                score = 0.4;
-            } else {
-                // Default fallback score
-                score = 0.5;
+        // Next, get Tajweed analysis if module is available
+        if (window.tajweedModule) {
+            try {
+                tajweedAnalysis = await window.tajweedModule.analyzeTajweedPronunciation(
+                    question.fullText, 
+                    transcription
+                );
+                
+                // Combine scores (70% basic pronunciation, 30% tajweed accuracy)
+                if (tajweedAnalysis && typeof tajweedAnalysis.score === 'number') {
+                    score = (score * 0.7) + (tajweedAnalysis.score * 0.3);
+                }
+            } catch (tajweedError) {
+                console.error('Tajweed analysis error:', tajweedError);
+                // Continue with basic score if tajweed analysis fails
             }
         }
-        
-        // Ensure score is between 0 and 1
-        score = Math.max(0, Math.min(1, score));
         
         // Show feedback based on score
         let feedbackMessage;
@@ -565,6 +600,20 @@ async function compareQuizRecitation(transcription, question) {
         }
         
         showQuizFeedback(feedbackMessage, score >= 0.6 ? 'success' : 'warning');
+        
+        // Display Tajweed feedback if available
+        if (tajweedAnalysis) {
+            // Create or get feedback container
+            let tajweedFeedbackContainer = document.getElementById('quizTajweedFeedback');
+            if (!tajweedFeedbackContainer) {
+                tajweedFeedbackContainer = document.createElement('div');
+                tajweedFeedbackContainer.id = 'quizTajweedFeedback';
+                document.getElementById('quizFeedback').parentNode.appendChild(tajweedFeedbackContainer);
+            }
+            
+            // Display the feedback
+            window.tajweedModule.displayTajweedFeedback(tajweedAnalysis, tajweedFeedbackContainer);
+        }
         
         // Update quiz score
         updateQuizScore(score);
@@ -743,14 +792,41 @@ function toggleQuizTransliteration() {
     const transliteration = document.getElementById('quizTransliteration');
     const toggleBtn = document.getElementById('quizToggleTransliterationBtn');
     
-    const isHidden = transliteration.style.display === "none";
-    if (isHidden) {
-        transliteration.style.display = "block";
-    } else {
-        transliteration.style.display = "none";
-    }
+    if (!transliteration || !toggleBtn) return;
     
-    toggleBtn.nextElementSibling.textContent = isHidden ? "Hide Transliteration" : "Show Transliteration";
+    const isHidden = transliteration.style.display === 'none';
+    
+    if (isHidden) {
+        transliteration.style.display = 'block';
+        toggleBtn.checked = true;
+    } else {
+        transliteration.style.display = 'none';
+        toggleBtn.checked = false;
+    }
+}
+
+/**
+ * Toggle Tajweed rules highlighting in quiz mode
+ */
+function toggleQuizTajweed() {
+    const tajweedToggle = document.getElementById('quizTajweedToggle');
+    const showTajweed = tajweedToggle.checked;
+    
+    // Save preference to localStorage
+    localStorage.setItem('showTajweed', showTajweed);
+    
+    // Update the display
+    if (currentQuiz && currentQuiz.currentQuestionIndex >= 0) {
+        const question = currentQuiz.questions[currentQuiz.currentQuestionIndex];
+        
+        if (question && question.type !== QUIZ_TYPES.MEANING && window.tajweedModule) {
+            if (showTajweed) {
+                document.getElementById('quizQuestion').innerHTML = window.tajweedModule.applyTajweedHighlighting(question.questionText, false);
+            } else {
+                document.getElementById('quizQuestion').textContent = question.questionText;
+            }
+        }
+    }
 }
 
 /**

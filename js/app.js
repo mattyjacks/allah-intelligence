@@ -162,7 +162,16 @@ function loadNextQuranText() {
     }
     
     if (currentMode === 'arabic') {
-        document.getElementById('quranText').textContent = currentQuranText.arabic;
+        // Get tajweed settings
+        const showTajweed = localStorage.getItem('showTajweed') !== 'false';
+        
+        // Apply Tajweed highlighting if enabled
+        if (showTajweed && window.tajweedModule) {
+            document.getElementById('quranText').innerHTML = window.tajweedModule.applyTajweedHighlighting(currentQuranText.arabic, false);
+        } else {
+            document.getElementById('quranText').textContent = currentQuranText.arabic;
+        }
+        
         document.getElementById('transliteration').textContent = currentQuranText.transliteration;
         document.getElementById('translation').textContent = currentQuranText.translation;
         
@@ -180,6 +189,21 @@ function loadNextQuranText() {
         // Append verse info after translation
         const translation = document.getElementById('translation');
         translation.parentNode.insertBefore(verseInfo, translation.nextSibling);
+        
+        // Add Tajweed toggle if it doesn't exist
+        if (!document.getElementById('tajweedToggle')) {
+            const toggleControls = document.getElementById('toggleControls');
+            const tajweedToggle = document.createElement('div');
+            tajweedToggle.className = 'toggle-box bottom-right-tajweed';
+            tajweedToggle.innerHTML = `
+                <input type="checkbox" id="tajweedToggle" ${showTajweed ? 'checked' : ''}>
+                <label for="tajweedToggle">Show Tajweed rules</label>
+            `;
+            toggleControls.appendChild(tajweedToggle);
+            
+            // Add event listener for Tajweed toggle
+            document.getElementById('tajweedToggle').addEventListener('change', toggleTajweed);
+        }
     } else {
         document.getElementById('quranText').textContent = currentQuranText.translation;
         document.getElementById('transliteration').textContent = '';
@@ -277,6 +301,26 @@ function toggleTransliteration(){
             transliteration.style.display = "none";
         }
         toggleTransliterationBtn.textContent = isHidden ? "Hide transliteration" : "Show transliteration";    
+}
+
+/**
+ * Toggle Tajweed rules highlighting
+ */
+function toggleTajweed() {
+    const tajweedToggle = document.getElementById('tajweedToggle');
+    const showTajweed = tajweedToggle.checked;
+    
+    // Save preference to localStorage
+    localStorage.setItem('showTajweed', showTajweed);
+    
+    // Update the display
+    if (currentMode === 'arabic' && currentQuranText) {
+        if (showTajweed && window.tajweedModule) {
+            document.getElementById('quranText').innerHTML = window.tajweedModule.applyTajweedHighlighting(currentQuranText.arabic, false);
+        } else {
+            document.getElementById('quranText').textContent = currentQuranText.arabic;
+        }
+    }
 }
 
 function updateToggleControlsVisibility() {

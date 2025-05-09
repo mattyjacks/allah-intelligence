@@ -1,0 +1,142 @@
+/**
+ * Allah Intelligence - Quran Teaching Tool
+ * Tajweed Rules Styling
+ */
+
+/* Tajweed highlighting */
+.tajweed-highlight {
+    transition: all 0.2s ease;
+}
+
+.tajweed-highlight:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Tajweed legend */
+.tajweed-legend {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--card-bg-color, #f5f5f5);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tajweed-legend h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: var(--text-color, #333);
+}
+
+.tajweed-legend ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tajweed-legend li {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--bg-color, #fff);
+    flex: 1 1 calc(50% - 10px);
+    min-width: 200px;
+}
+
+/* Tajweed feedback */
+.tajweed-feedback {
+    margin: 15px 0;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: var(--card-bg-color, #f5f5f5);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tajweed-feedback h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: var(--text-color, #333);
+}
+
+.tajweed-feedback h5 {
+    margin: 15px 0 5px;
+    font-size: 16px;
+    color: var(--text-color, #333);
+}
+
+.tajweed-score {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.score-value {
+    color: var(--accent-color, #4CAF50);
+}
+
+.tajweed-correct, .tajweed-improve, .tajweed-advice {
+    margin-bottom: 15px;
+}
+
+.tajweed-correct ul, .tajweed-improve ul {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0;
+}
+
+.tajweed-correct li, .tajweed-improve li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: var(--bg-color, #fff);
+}
+
+.tajweed-advice p {
+    margin: 5px 0;
+    padding: 10px;
+    background-color: var(--bg-color, #fff);
+    border-radius: 4px;
+    font-style: italic;
+}
+
+/* Tajweed toggle switch */
+.tajweed-toggle {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.tajweed-toggle label {
+    margin-left: 8px;
+    font-size: 14px;
+    color: var(--text-color, #333);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tajweed-legend li {
+        flex: 1 1 100%;
+    }
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .tajweed-legend,
+[data-theme="dark"] .tajweed-feedback {
+    background-color: var(--card-bg-color, #2a2a2a);
+}
+
+[data-theme="dark"] .tajweed-legend li,
+[data-theme="dark"] .tajweed-correct li, 
+[data-theme="dark"] .tajweed-improve li,
+[data-theme="dark"] .tajweed-advice p {
+    background-color: var(--bg-color, #333);
+}

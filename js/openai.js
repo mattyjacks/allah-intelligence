@@ -65,7 +65,13 @@ async function processAudioWithOpenAI(audioBlob) {
  */
 async function compareWithQuranText(transcription) {
     try {
-        // Prepare request to OpenAI API for comparison
+        // Show processing feedback
+        showFeedback('Analyzing your recitation...', '');
+        
+        let score = 0.5; // Default score
+        let tajweedAnalysis = null;
+        
+        // First, get basic pronunciation score
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -89,47 +95,124 @@ async function compareWithQuranText(transcription) {
             })
         });
         
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || 'Error comparing texts');
+        if (response.ok) {
+            // Get comparison result
+            const result = await response.json();
+            const scoreText = result.choices[0].message.content.trim();
+            
+            // Extract score from the response text
+            const numberMatch = scoreText.match(/([0-9]*[.])?[0-9]+/);
+            if (numberMatch) {
+                score = parseFloat(numberMatch[0]);
+            } else {
+                // If no number found, make a best guess based on the text
+                if (scoreText.toLowerCase().includes('excellent') || 
+                    scoreText.toLowerCase().includes('perfect')) {
+                    score = 0.95;
+                } else if (scoreText.toLowerCase().includes('good')) {
+                    score = 0.8;
+                } else if (scoreText.toLowerCase().includes('fair') || 
+                          scoreText.toLowerCase().includes('average')) {
+                    score = 0.6;
+                } else if (scoreText.toLowerCase().includes('poor')) {
+                    score = 0.4;
+                } else {
+                    // Default fallback score
+                    score = 0.5;
+                    console.log('Using fallback score. API returned:', scoreText);
+                }
+            }
+            
+            // Ensure score is between 0 and 1
+            score = Math.max(0, Math.min(1, score));
         }
         
-        // Get comparison result
-        const result = await response.json();
-        const scoreText = result.choices[0].message.content.trim();
-        
-        // Extract score from the response text
-        // The model might return just a number, or it might include text
-        let score;
-        
-        // Try to extract a number from the response
-        const numberMatch = scoreText.match(/([0-9]*[.])?[0-9]+/);
-        if (numberMatch) {
-            score = parseFloat(numberMatch[0]);
-        } else {
-            // If no number found, make a best guess based on the text
-            if (scoreText.toLowerCase().includes('excellent') || 
-                scoreText.toLowerCase().includes('perfect')) {
-                score = 0.95;
-            } else if (scoreText.toLowerCase().includes('good')) {
-                score = 0.8;
-            } else if (scoreText.toLowerCase().includes('fair') || 
-                      scoreText.toLowerCase().includes('average')) {
-                score = 0.6;
-            } else if (scoreText.toLowerCase().includes('poor')) {
-                score = 0.4;
-            } else {
-                // Default fallback score
-                score = 0.5;
-                console.log('Using fallback score. API returned:', scoreText);
+        // Next, get Tajweed analysis if module is available
+        if (window.tajweedModule) {
+            try {
+                tajweedAnalysis = await window.tajweedModule.analyzeTajweedPronunciation(
+                    currentQuranText.arabic, 
+                    transcription
+                );
+                
+                // Combine scores (70% basic pronunciation, 30% tajweed accuracy)
+                if (tajweedAnalysis && typeof tajweedAnalysis.score === 'number') {
+                    score = (score * 0.7) + (tajweedAnalysis.score * 0.3);
+                }
+            } catch (tajweedError) {
+                console.error('Tajweed analysis error:', tajweedError);
+                // Continue with basic score if tajweed analysis fails
             }
         }
         
-        // Ensure score is between 0 and 1
-        score = Math.max(0, Math.min(1, score));
+        // Update the UI with score and feedback
+        updateScoreDisplay(score);
+        
+        // Show feedback based on score
+        let feedbackMessage;
+        if (score >= 0.8) {
+            feedbackMessage = 'Excellent pronunciation!';
+        } else if (score >= 0.6) {
+            feedbackMessage = 'Good pronunciation, keep practicing!';
+        } else if (score >= 0.4) {
+            feedbackMessage = 'Fair pronunciation, try to improve.';
+        } else {
+            feedbackMessage = 'Needs improvement. Listen to the correct pronunciation and try again.';
+        }
+        
+        showFeedback(feedbackMessage, score >= 0.6 ? 'success' : 'warning');
+        
+        // Display Tajweed feedback if available
+        if (tajweedAnalysis) {
+            // Create or get feedback container
+            let tajweedFeedbackContainer = document.getElementById('tajweedFeedback');
+            if (!tajweedFeedbackContainer) {
+                tajweedFeedbackContainer = document.createElement('div');
+                tajweedFeedbackContainer.id = 'tajweedFeedback';
+                document.getElementById('recognitionText').parentNode.appendChild(tajweedFeedbackContainer);
+            }
+            
+            // Display the feedback
+            window.tajweedModule.displayTajweedFeedback(tajweedAnalysis, tajweedFeedbackContainer);
+        }
+        
     } catch (error) {
         console.error('OpenAI API Error:', error);
         showFeedback('Error: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Update the score display in the UI
+ * @param {number} score - The pronunciation score (0-1)
+ */
+function updateScoreDisplay(score) {
+    // Create or get score display element
+    let scoreDisplay = document.getElementById('pronunciationScore');
+    if (!scoreDisplay) {
+        scoreDisplay = document.createElement('div');
+        scoreDisplay.id = 'pronunciationScore';
+        scoreDisplay.className = 'pronunciation-score';
+        document.getElementById('recognitionText').parentNode.insertBefore(
+            scoreDisplay, 
+            document.getElementById('recognitionText')
+        );
+    }
+    
+    // Update the score display
+    const percentage = Math.round(score * 100);
+    scoreDisplay.innerHTML = `<span class="score-label">Pronunciation Score:</span> <span class="score-value">${percentage}%</span>`;
+    
+    // Add color based on score
+    scoreDisplay.className = 'pronunciation-score';
+    if (score >= 0.8) {
+        scoreDisplay.classList.add('excellent');
+    } else if (score >= 0.6) {
+        scoreDisplay.classList.add('good');
+    } else if (score >= 0.4) {
+        scoreDisplay.classList.add('fair');
+    } else {
+        scoreDisplay.classList.add('poor');
     }
 }
 
