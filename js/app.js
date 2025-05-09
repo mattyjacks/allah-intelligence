@@ -1,6 +1,7 @@
 /**
  * Allah Intelligence - Quran Teaching Tool
  * Main Application JavaScript
+ * Updated with dark mode and comprehensive Quran database integration
  */
 
 // Global variables
@@ -13,16 +14,39 @@ let recordedAudio = null;
 
 // DOM Elements
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme toggle
+    const themeToggle = document.getElementById('checkbox');
+    
+    // Check for saved theme preference or prefer-color-scheme
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const savedTheme = localStorage.getItem('theme');
+    
+    // Apply saved theme or system preference
+    if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
+        document.body.setAttribute('data-theme', 'dark');
+        themeToggle.checked = true;
+    }
+    
+    // Theme toggle event listener
+    themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    });
     // Mode buttons
     const arabicModeBtn = document.getElementById('arabicModeBtn');
     const englishModeBtn = document.getElementById('englishModeBtn');
+    const quizModeBtn = document.getElementById('quizModeBtn');
     
     // Control buttons
     const playBtn = document.getElementById('playBtn');
     const nextBtn = document.getElementById('nextBtn');
     const recordBtn = document.getElementById('recordBtn');
     const playRecordingBtn = document.getElementById('playRecordingBtn');
-    const quizModeBtn = document.getElementById('quizModeBtn');
     const toggleTranslationBtn = document.getElementById("toggleTranslationBtn");
     
     // Display elements
@@ -112,19 +136,45 @@ function setMode(mode) {
 
 /**
  * Load the next Quran text based on current mode and difficulty
+ * Uses the comprehensive Quran database
  */
 function loadNextQuranText() {
-    
-    currentQuranText = getRandomQuranText(currentDifficulty);
+    // Get verse from the comprehensive database if available, fallback to original data
+    if (typeof quranDatabase !== 'undefined') {
+        currentQuranText = quranDatabase.getRandomVerseByDifficulty(currentDifficulty);
+    } else {
+        currentQuranText = getRandomQuranText(currentDifficulty);
+    }
     
     if (currentMode === 'arabic') {
         document.getElementById('quranText').textContent = currentQuranText.arabic;
         document.getElementById('transliteration').textContent = currentQuranText.transliteration;
         document.getElementById('translation').textContent = currentQuranText.translation;
+        
+        // Add surah and ayah information if available
+        const verseInfo = document.createElement('div');
+        verseInfo.className = 'verse-info';
+        verseInfo.textContent = `${currentQuranText.surah} (${currentQuranText.surahNumber || ''}:${currentQuranText.ayah})`;
+        
+        // Remove previous verse info if exists
+        const existingVerseInfo = document.querySelector('.verse-info');
+        if (existingVerseInfo) {
+            existingVerseInfo.remove();
+        }
+        
+        // Append verse info after translation
+        const translation = document.getElementById('translation');
+        translation.parentNode.insertBefore(verseInfo, translation.nextSibling);
     } else {
         document.getElementById('quranText').textContent = currentQuranText.translation;
         document.getElementById('transliteration').textContent = '';
         document.getElementById('translation').textContent = '';
+        
+        // Remove verse info in English mode
+        const existingVerseInfo = document.querySelector('.verse-info');
+        if (existingVerseInfo) {
+            existingVerseInfo.remove();
+        }
     }
 }
 

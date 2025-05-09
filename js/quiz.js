@@ -1,6 +1,7 @@
 /**
  * Allah Intelligence - Quran Teaching Tool
  * Quiz Module
+ * Updated to use comprehensive Quran database
  */
 
 // Quiz types and current state
@@ -27,6 +28,10 @@ function initQuiz() {
     document.querySelectorAll('input[name="quizType"]').forEach(radio => {
         radio.addEventListener('change', updateQuizTypeUI);
     });
+    
+    // Add event listeners for toggle buttons
+    document.getElementById('quizToggleTranslationBtn').addEventListener('click', toggleQuizTranslation);
+    document.getElementById('quizToggleTransliterationBtn').addEventListener('click', toggleQuizTransliteration);
 }
 
 /**
@@ -58,8 +63,13 @@ function startQuiz() {
  * @param {string} difficulty - Difficulty level (beginner, intermediate, advanced)
  */
 function createQuiz(type, difficulty) {
-    // Get verses for the selected difficulty
-    const verses = quranData[difficulty] || quranData.beginner;
+    // Get verses for the selected difficulty from comprehensive database if available
+    let verses;
+    if (typeof quranDatabase !== 'undefined') {
+        verses = quranDatabase.getVersesByDifficulty(difficulty);
+    } else {
+        verses = quranData[difficulty] || quranData.beginner;
+    }
     
     // Create quiz object
     currentQuiz = {
@@ -213,6 +223,9 @@ function loadNextQuestion() {
     
     // Setup answer interface based on quiz type
     setupAnswerInterface(question);
+    
+    // Update toggle controls visibility based on quiz type
+    updateQuizToggleControlsVisibility();
     
     // Show submit button and hide next button
     document.getElementById('submitAnswerBtn').classList.remove('hidden');
@@ -704,6 +717,53 @@ function getRandomIndices(max, count) {
         }
     }
     return indices;
+}
+
+/**
+ * Toggle quiz translation visibility
+ */
+function toggleQuizTranslation() {
+    const translation = document.getElementById('quizTranslation');
+    const toggleBtn = document.getElementById('quizToggleTranslationBtn');
+    
+    const isHidden = translation.style.display === "none";
+    if (isHidden) {
+        translation.style.display = "block";
+    } else {
+        translation.style.display = "none";
+    }
+    
+    toggleBtn.nextElementSibling.textContent = isHidden ? "Hide Translation" : "Show Translation";
+}
+
+/**
+ * Toggle quiz transliteration visibility
+ */
+function toggleQuizTransliteration() {
+    const transliteration = document.getElementById('quizTransliteration');
+    const toggleBtn = document.getElementById('quizToggleTransliterationBtn');
+    
+    const isHidden = transliteration.style.display === "none";
+    if (isHidden) {
+        transliteration.style.display = "block";
+    } else {
+        transliteration.style.display = "none";
+    }
+    
+    toggleBtn.nextElementSibling.textContent = isHidden ? "Hide Transliteration" : "Show Transliteration";
+}
+
+/**
+ * Update quiz toggle controls visibility based on quiz type
+ */
+function updateQuizToggleControlsVisibility() {
+    const controls = document.getElementById("quizToggleControls");
+    // Only show toggle controls for writing and speaking quizzes (which display Arabic text)
+    if (currentQuiz && (currentQuiz.type === QUIZ_TYPES.WRITING || currentQuiz.type === QUIZ_TYPES.SPEAKING)) {
+        controls.style.display = "block";
+    } else {
+        controls.style.display = "none";
+    }
 }
 
 // Initialize the quiz module when the DOM is loaded
