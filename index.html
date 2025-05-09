@@ -128,24 +128,6 @@
             </div>
         </div>
         
-        <div class="settings-panel">
-            <h3>Settings</h3>
-            <div class="setting">
-                <label for="difficultyLevel">Difficulty Level:</label>
-                <select id="difficultyLevel">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                </select>
-            </div>
-            <div class="setting">
-                <label for="apiKey">OpenAI API Key:</label>
-                <input type="password" id="apiKey" placeholder="Enter your OpenAI API key">
-                <label for="apiKey" id="apiKeyFeedback" class="feedback"></label>
-                <button id="saveApiKey">Save</button>
-            </div>
-        </div>
-
         <!-- Quiz Section -->
         <div id="quizContainer" class="quiz-container hidden">
             <div class="quiz-header">
@@ -226,6 +208,24 @@
                         <i class="fas fa-arrow-right"></i> Next Question
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <h3>Settings</h3>
+            <div class="setting">
+                <label for="difficultyLevel">Difficulty Level:</label>
+                <select id="difficultyLevel">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </div>
+            <div class="setting">
+                <label for="apiKey">OpenAI API Key:</label>
+                <input type="password" id="apiKey" placeholder="Enter your OpenAI API key">
+                <label for="apiKey" id="apiKeyFeedback" class="feedback"></label>
+                <button id="saveApiKey">Save</button>
             </div>
         </div>
         
