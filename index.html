@@ -14,12 +14,53 @@
 </head>
 <body>
     <div class="container">
-        <div class="theme-switch-wrapper">
-            <label class="theme-switch" for="checkbox">
-                <input type="checkbox" id="checkbox" />
-                <div class="slider"></div>
-            </label>
-            <span class="theme-label">Dark Mode</span>
+        <!-- Settings Toggle Button -->
+        <button class="settings-toggle" id="settingsToggle">
+            <i class="fas fa-cog"></i>
+        </button>
+        
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settingsPanel">
+            <button class="settings-close" id="closeSettings">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3>Settings</h3>
+            
+            <!-- Theme Switch -->
+            <div class="setting">
+                <label for="checkbox">Dark Mode:</label>
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider"></div>
+                </label>
+            </div>
+            
+            <!-- Difficulty Level -->
+            <div class="setting">
+                <label for="difficultyLevel">Difficulty Level:</label>
+                <select id="difficultyLevel">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </div>
+            
+            <!-- Transcription Service -->
+            <div class="setting">
+                <label>Transcription Service:</label>
+                <div id="transcriptionServiceToggle" class="service-toggle">
+                    <button class="service-btn active" data-service="assemblyai">AssemblyAI</button>
+                    <button class="service-btn" data-service="openai">OpenAI</button>
+                </div>
+            </div>
+            
+            <!-- API Keys -->
+            <div class="setting">
+                <label for="apiKey">OpenAI API Key:</label>
+                <input type="password" id="apiKey" placeholder="Enter your OpenAI API key">
+                <label for="apiKey" id="apiKeyFeedback" class="feedback"></label>
+                <button id="saveApiKey" class="small-btn">Save</button>
+            </div>
         </div>
         <header>
             <h1>Allah Intelligence</h1>
@@ -88,8 +129,11 @@
                 
                 <div class="interaction-row">
                     <div class="interaction-card">
-                        <h3 class="section-title"><i class="fas fa-headphones"></i> What AI Heard</h3>
-                        <div id="recognitionText" class="recognition-text"></div>
+                        <div class="transcription-header" id="transcriptionHeader">
+                            <h3 class="section-title"><i class="fas fa-headphones"></i> What AI Heard</h3>
+                            <i class="fas fa-chevron-down" id="transcriptionToggle"></i>
+                        </div>
+                        <div id="recognitionText" class="recognition-text collapsible-content expanded"></div>
                     </div>
                 </div>
             </div>
@@ -212,24 +256,7 @@
             </div>
         </div>
 
-        <div class="settings-panel">
-            <h3>Settings</h3>
-            <div class="setting">
-                <label for="difficultyLevel">Difficulty Level:</label>
-                <select id="difficultyLevel">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                </select>
-            </div>
-            <div class="setting">
-                <label for="apiKey">OpenAI API Key:</label>
-                <input type="password" id="apiKey" placeholder="Enter your OpenAI API key">
-                <label for="apiKey" id="apiKeyFeedback" class="feedback"></label>
-                <button id="saveApiKey">Save</button>
-            </div>
-
-        </div>
+        <!-- Settings panel moved to top of page -->
         
         <footer>
             <p>Allah Intelligence &copy; 2025 | A Quran Teaching Tool</p>

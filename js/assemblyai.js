@@ -53,17 +53,24 @@ async function processAudioWithAssemblyAI(audioBlob) {
  * @param {string} arabicText - The transcribed Arabic text
  */
 async function displayEnhancedRecognitionResults(arabicText) {
+    const recognitionText = document.getElementById('recognitionText');
+    if (!recognitionText) return;
+    
     if (!arabicText || arabicText.trim() === '') {
-        document.getElementById('recognitionText').innerHTML = '<p class="no-results">No speech detected. Please try again.</p>';
+        recognitionText.innerHTML = '<p class="no-results">No speech detected. Please try again.</p>';
         return;
     }
     
     try {
-        // Show the Arabic text first
-        document.getElementById('recognitionText').innerHTML = `
+        // Show the Arabic text first with loading indicator
+        recognitionText.innerHTML = `
+            <div class="section-label">Raw Transcription</div>
             <div class="recognition-arabic">${arabicText}</div>
             <div class="recognition-loading">Analyzing your recitation...</div>
         `;
+        
+        // Add appropriate direction class
+        recognitionText.classList.add('arabic');
         
         // Use the hardcoded worker URL for OpenAI translation and comparison
         const workerUrl = 'https://allah-intelligence-api-proxy.matthewwarrenjackson.workers.dev';
@@ -81,7 +88,7 @@ async function displayEnhancedRecognitionResults(arabicText) {
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert in Arabic language and Quranic analysis. Provide a detailed analysis of the user's recitation compared to the original text. Include: 1) Transliteration of the user's recitation, 2) English translation of the user's recitation, 3) Comparison with the original text's meaning, 4) A similarity score from 0 to 100 representing how close the meaning is to the original."
+                        content: "You are an expert in Arabic language and Quranic analysis. Provide a detailed analysis of the user's recitation compared to the original text. Include: 1) Transliteration of the user's recitation, 2) English translation of the user's recitation, 3) Comparison with the original text's meaning, 4) A similarity score from 0 to 100 representing how close the meaning is to the original. If the user's recitation is not proper Arabic or seems like a misinterpretation, make sure to highlight this in your analysis."
                     },
                     {
                         role: "user",
@@ -118,19 +125,33 @@ async function displayEnhancedRecognitionResults(arabicText) {
         else if (score >= 40) scoreColorClass = 'fair-score';
         else scoreColorClass = 'poor-score';
         
-        // Update the recognition text with all components
-        document.getElementById('recognitionText').innerHTML = `
+        // Update the recognition text with all components in a more compact format
+        recognitionText.innerHTML = `
+            <div class="section-label">Raw Transcription</div>
             <div class="recognition-arabic">${arabicText}</div>
-            <div class="recognition-transliteration"><strong>Transliteration:</strong> ${transliteration}</div>
-            <div class="recognition-translation"><strong>Translation:</strong> ${translation}</div>
-            <div class="recognition-comparison"><strong>Meaning Comparison:</strong> ${comparison}</div>
-            <div class="recognition-meaning-score ${scoreColorClass}"><strong>Meaning Similarity:</strong> <span>${score}%</span></div>
+            <div class="divider"></div>
+            
+            <div class="section-label">Analysis</div>
+            <div class="recognition-transliteration">${transliteration}</div>
+            <div class="recognition-translation">${translation}</div>
+            <div class="divider"></div>
+            
+            <div class="meaning-comparison">${comparison}</div>
+            <div class="similarity-score ${scoreColorClass}">${score}%</div>
         `;
         
+        // Highlight misinterpretation if score is very low
+        if (score < 20) {
+            const misinterpretationNote = document.createElement('div');
+            misinterpretationNote.className = 'recognition-error';
+            misinterpretationNote.innerHTML = 'Note: Your speech appears to have been misinterpreted. Try speaking more clearly or adjusting your microphone.';
+            recognitionText.appendChild(misinterpretationNote);
+        }
     } catch (error) {
         console.error('Error enhancing recognition results:', error);
         // Still show the Arabic text even if enhancement fails
-        document.getElementById('recognitionText').innerHTML = `
+        recognitionText.innerHTML = `
+            <div class="section-label">Raw Transcription</div>
             <div class="recognition-arabic">${arabicText}</div>
             <div class="recognition-error">Could not generate complete analysis. Please try again.</div>
         `;

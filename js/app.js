@@ -14,6 +14,34 @@ let recordedAudio = null;
 
 // DOM Elements
 document.addEventListener('DOMContentLoaded', () => {
+    // Settings panel toggle functionality
+    const settingsToggle = document.getElementById('settingsToggle');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const closeSettings = document.getElementById('closeSettings');
+    
+    if (settingsToggle && settingsPanel && closeSettings) {
+        settingsToggle.addEventListener('click', function() {
+            settingsPanel.classList.add('active');
+        });
+        
+        closeSettings.addEventListener('click', function() {
+            settingsPanel.classList.remove('active');
+        });
+    }
+    
+    // Transcription area toggle functionality
+    const transcriptionHeader = document.getElementById('transcriptionHeader');
+    const recognitionText = document.getElementById('recognitionText');
+    const transcriptionToggle = document.getElementById('transcriptionToggle');
+    
+    if (transcriptionHeader && recognitionText && transcriptionToggle) {
+        transcriptionHeader.addEventListener('click', function() {
+            recognitionText.classList.toggle('expanded');
+            transcriptionToggle.classList.toggle('fa-chevron-down');
+            transcriptionToggle.classList.toggle('fa-chevron-up');
+        });
+    }
+
     // Theme toggle
     const themeToggle = document.getElementById('checkbox');
     
