@@ -311,6 +311,7 @@ async function handleAssemblyAITranscription(request, env) {
   const audioUrl = uploadResult.upload_url;
 
   // Step 2: Transcribe the uploaded audio using the nano model for Arabic
+  // Always force Arabic language interpretation regardless of actual content
   const transcribeResponse = await fetch('https://api.assemblyai.com/v2/transcript', {
     method: 'POST',
     headers: {
@@ -319,8 +320,9 @@ async function handleAssemblyAITranscription(request, env) {
     },
     body: JSON.stringify({
       audio_url: audioUrl,
-      language_code: 'ar',  // Arabic language code
-      speech_model: 'nano'  // Must use 'nano' model for Arabic as per AssemblyAI docs
+      language_code: 'ar',  // Force Arabic language code
+      speech_model: 'nano',  // Must use 'nano' model for Arabic as per AssemblyAI docs
+      language_detection: false  // Disable automatic language detection
     })
   });
 

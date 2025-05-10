@@ -12,7 +12,7 @@
  */
 async function processAudioWithAssemblyAI(audioBlob) {
     try {
-        showFeedback('Processing your recitation with AssemblyAI...', '');
+        showFeedback('Processing your recitation as Arabic...', '');
         
         // Create FormData object for file upload
         const formData = new FormData();

@@ -93,17 +93,10 @@ function startRecording() {
                 }
                 
                 // Process the recorded audio
-                if (currentMode === 'arabic') {
-                    // Use the selected transcription service
-                    if (transcriptionService === 'assemblyai') {
-                        processAudioWithAssemblyAI(audioBlob);
-                    } else {
-                        processAudioWithOpenAI(audioBlob);
-                    }
-                } else {
-                    // For English mode, use the built-in speech recognition
-                    recognition.start();
-                }
+                // Always use AssemblyAI for transcription and always interpret as Arabic
+                processAudioWithAssemblyAI(audioBlob);
+                // Note: We're no longer using the mode or transcription service selection
+                // Everything is forced to use AssemblyAI and interpret as Arabic
             };
             
             // Request data at regular intervals to ensure we get chunks
@@ -225,48 +218,15 @@ function setTranscriptionService(service) {
 }
 
 /**
- * Initialize the transcription service from saved preferences
+ * Initialize the transcription service
+ * Note: We now always use AssemblyAI for Arabic transcription
  */
 function initTranscriptionService() {
-    const savedService = localStorage.getItem('transcription_service');
-    if (savedService) {
-        transcriptionService = savedService;
-    }
+    // Always set to AssemblyAI
+    transcriptionService = 'assemblyai';
+    localStorage.setItem('transcription_service', 'assemblyai');
     
-    // Create transcription service buttons if they don't exist
-    if (!document.getElementById('transcriptionServiceToggle')) {
-        const interactionArea = document.querySelector('.interaction-area');
-        if (interactionArea) {
-            const serviceToggle = document.createElement('div');
-            serviceToggle.id = 'transcriptionServiceToggle';
-            serviceToggle.className = 'interaction-row';
-            serviceToggle.innerHTML = `
-                <div class="interaction-card">
-                    <h3 class="section-title"><i class="fas fa-cogs"></i> Transcription Service</h3>
-                    <div class="button-row">
-                        <button id="openaiServiceBtn" class="service-btn ${transcriptionService === 'openai' ? 'active' : ''}">
-                            <i class="fas fa-brain"></i> OpenAI
-                        </button>
-                        <button id="assemblyaiServiceBtn" class="service-btn ${transcriptionService === 'assemblyai' ? 'active' : ''}">
-                            <i class="fas fa-language"></i> AssemblyAI
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            // Insert after the first interaction card
-            const firstCard = interactionArea.querySelector('.interaction-card');
-            if (firstCard) {
-                firstCard.parentNode.insertBefore(serviceToggle, firstCard.nextSibling);
-            } else {
-                interactionArea.appendChild(serviceToggle);
-            }
-            
-            // Add event listeners
-            document.getElementById('openaiServiceBtn').addEventListener('click', () => setTranscriptionService('openai'));
-            document.getElementById('assemblyaiServiceBtn').addEventListener('click', () => setTranscriptionService('assemblyai'));
-        }
-    }
+    // No need to create UI toggles since we're always using AssemblyAI
 }
 
 /**
