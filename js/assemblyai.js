@@ -88,7 +88,7 @@ async function displayEnhancedRecognitionResults(arabicText) {
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert in Arabic language and Quranic analysis. Provide a detailed analysis of the user's recitation compared to the original text. Include: 1) Transliteration of the user's recitation, 2) English translation of the user's recitation, 3) Comparison with the original text's meaning, 4) A similarity score from 0 to 100 representing how close the meaning is to the original. If the user's recitation is not proper Arabic or seems like a misinterpretation, make sure to highlight this in your analysis."
+                        content: "You are an expert in Arabic language and Quranic analysis. Provide a detailed analysis of the user's recitation compared to the original text. Include: 1) Transliteration of the user's recitation, 2) English translation of the user's recitation, 3) Comparison with the original text's meaning, 4) A similarity score from 0 to 100 representing how close the meaning is to the original. If the user's recitation is not proper Arabic or seems like a misinterpretation (e.g. English words transcribed as Arabic), you must provide the phonetic Arabic equivalent of what they actually said. For example, if they said 'hello hello hello' and it was transcribed as Arabic text, explain what Arabic words those transcriptions actually represent phonetically."
                     },
                     {
                         role: "user",
@@ -141,10 +141,10 @@ async function displayEnhancedRecognitionResults(arabicText) {
         `;
         
         // Highlight misinterpretation if score is very low
-        if (score < 20) {
+        if (score < 30) {
             const misinterpretationNote = document.createElement('div');
             misinterpretationNote.className = 'recognition-error';
-            misinterpretationNote.innerHTML = 'Note: Your speech appears to have been misinterpreted. Try speaking more clearly or adjusting your microphone.';
+            misinterpretationNote.innerHTML = 'Note: Your speech appears to have been interpreted as Arabic words that sound similar to what you said in English. The system is designed to help you learn Arabic pronunciation, so try reciting the actual Arabic text shown above.';
             recognitionText.appendChild(misinterpretationNote);
         }
     } catch (error) {

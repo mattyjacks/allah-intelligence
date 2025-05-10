@@ -22,11 +22,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (settingsToggle && settingsPanel && closeSettings) {
         settingsToggle.addEventListener('click', function() {
             settingsPanel.classList.add('active');
+            // Hide settings hint when settings panel is opened
+            if (settingsHint) {
+                settingsHint.style.display = 'none';
+                localStorage.setItem('settingsHintDismissed', 'true');
+            }
         });
         
         closeSettings.addEventListener('click', function() {
             settingsPanel.classList.remove('active');
         });
+        
+        // Create and show settings hint if not previously dismissed
+        if (localStorage.getItem('settingsHintDismissed') !== 'true') {
+            const settingsHint = document.createElement('div');
+            settingsHint.className = 'settings-hint';
+            settingsHint.innerHTML = `
+                <div class="settings-hint-arrow"></div>
+                <button class="settings-hint-close">&times;</button>
+                <div class="settings-hint-text">Click here to access settings</div>
+            `;
+            document.body.appendChild(settingsHint);
+            
+            // Add event listener to close button
+            const closeHintBtn = settingsHint.querySelector('.settings-hint-close');
+            closeHintBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                settingsHint.style.display = 'none';
+                localStorage.setItem('settingsHintDismissed', 'true');
+            });
+        }
     }
     
     // Transcription area toggle functionality
@@ -91,8 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Settings elements
     const difficultyLevel = document.getElementById('difficultyLevel');
-    const apiKeyInput = document.getElementById('apiKey');
-    const saveApiKeyBtn = document.getElementById('saveApiKey');
     
     // Initialize the application
     initApp();
@@ -122,15 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         difficultyLevel.value = currentDifficulty;
     });
     
-    saveApiKeyBtn.addEventListener('click', () => {
-        apiKey = apiKeyInput.value.trim();
-        if (apiKey) {
-            localStorage.setItem('openai_api_key', apiKey);
-            showFeedback('API key saved successfully!', 'success');
-        } else {
-            showFeedback('Please enter a valid API key', 'error');
-        }
-    });
+    // API key handling removed - now handled through Cloudflare worker
     
 
 });
@@ -139,14 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
  * Initialize the application
  */
 function initApp() {
-    // Load saved API key if available
-    apiKey = localStorage.getItem('openai_api_key') || '';
-    if (apiKey) {
-        document.getElementById('apiKey').value = apiKey;
-    }
-    
-
-    
     // Initialize transcription service
     if (typeof initTranscriptionService === 'function') {
         initTranscriptionService();
