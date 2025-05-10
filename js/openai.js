@@ -121,14 +121,17 @@ async function compareWithQuranText(transcription) {
         // Next, get Tajweed analysis if module is available
         if (window.tajweedModule) {
             try {
-                tajweedAnalysis = await window.tajweedModule.analyzeTajweedPronunciation(
-                    currentQuranText.arabic, 
-                    transcription
-                );
-                
-                // Combine scores (70% basic pronunciation, 30% tajweed accuracy)
-                if (tajweedAnalysis && typeof tajweedAnalysis.score === 'number') {
-                    score = (score * 0.7) + (tajweedAnalysis.score * 0.3);
+                // Only attempt Tajweed analysis if we have valid text
+                if (currentQuranText && currentQuranText.arabic && transcription && transcription.trim() !== '') {
+                    tajweedAnalysis = await window.tajweedModule.analyzeTajweedPronunciation(
+                        currentQuranText.arabic, 
+                        transcription
+                    );
+                    
+                    // Combine scores (70% basic pronunciation, 30% tajweed accuracy)
+                    if (tajweedAnalysis && typeof tajweedAnalysis.score === 'number') {
+                        score = (score * 0.7) + (tajweedAnalysis.score * 0.3);
+                    }
                 }
             } catch (tajweedError) {
                 console.error('Tajweed analysis error:', tajweedError);

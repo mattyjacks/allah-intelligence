@@ -113,7 +113,7 @@ async function handleOpenAITranscription(request, env) {
   const openAIFormData = new FormData();
   openAIFormData.append('file', audioFile);
   openAIFormData.append('model', 'whisper-1');
-  openAIFormData.append('response_format', 'text');
+  openAIFormData.append('response_format', 'text'); // Using text format for simplicity
 
   // Forward the request to OpenAI
   const openAIResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
@@ -319,8 +319,8 @@ async function handleAssemblyAITranscription(request, env) {
     },
     body: JSON.stringify({
       audio_url: audioUrl,
-      language_code: 'ar',
-      model: 'nano'
+      language_code: 'ar',  // Arabic language code
+      speech_model: 'nano'  // Must use 'nano' model for Arabic as per AssemblyAI docs
     })
   });
 
