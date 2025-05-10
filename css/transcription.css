@@ -30,20 +30,79 @@
 
 /* Recognition Text Styling */
 .recognition-arabic {
-    font-size: 1.5rem;
+    font-size: 2rem;
     direction: rtl;
-    margin-bottom: 0.5rem;
-    line-height: 1.6;
+    margin-bottom: 1rem;
+    line-height: 1.8;
+    color: #1e88e5; /* Bright blue color for better visibility */
+    font-weight: bold;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    padding: 10px;
+    background-color: rgba(232, 245, 255, 0.5); /* Light blue background */
+    border-radius: 8px;
+    border-right: 4px solid #1e88e5;
 }
 
 .recognition-transliteration {
     font-style: italic;
     margin-bottom: 0.5rem;
     color: #666;
+    font-size: 1.1rem;
+    padding: 5px 0;
 }
 
 .recognition-translation {
     color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    padding: 5px 0;
+}
+
+.recognition-comparison {
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    padding: 5px 0;
+    border-top: 1px dashed #ddd;
+    padding-top: 10px;
+}
+
+.recognition-meaning-score {
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.recognition-meaning-score span {
+    font-size: 1.5rem;
+    padding: 0 5px;
+}
+
+.excellent-score {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+}
+
+.good-score {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ff8f00;
+    border-left: 4px solid #ff8f00;
+}
+
+.fair-score {
+    background-color: rgba(255, 152, 0, 0.2);
+    color: #e65100;
+    border-left: 4px solid #e65100;
+}
+
+.poor-score {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #c62828;
+    border-left: 4px solid #c62828;
 }
 
 .recognition-loading {
@@ -80,12 +139,49 @@
     background-color: #444;
 }
 
+[data-theme="dark"] .recognition-arabic {
+    color: #64b5f6; /* Lighter blue for dark mode */
+    background-color: rgba(13, 71, 161, 0.3); /* Dark blue background with transparency */
+    border-right: 4px solid #64b5f6;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
 [data-theme="dark"] .recognition-transliteration {
     color: #aaa;
 }
 
 [data-theme="dark"] .recognition-translation {
     color: #ddd;
+}
+
+[data-theme="dark"] .recognition-comparison {
+    color: #ddd;
+    border-top: 1px dashed #444;
+}
+
+/* Dark mode score colors - slightly adjusted for better visibility */
+[data-theme="dark"] .excellent-score {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #81c784;
+    border-left: 4px solid #81c784;
+}
+
+[data-theme="dark"] .good-score {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #ffd54f;
+    border-left: 4px solid #ffd54f;
+}
+
+[data-theme="dark"] .fair-score {
+    background-color: rgba(255, 152, 0, 0.15);
+    color: #ffb74d;
+    border-left: 4px solid #ffb74d;
+}
+
+[data-theme="dark"] .poor-score {
+    background-color: rgba(244, 67, 54, 0.15);
+    color: #e57373;
+    border-left: 4px solid #e57373;
 }
 
 [data-theme="dark"] .recognition-loading {

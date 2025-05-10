@@ -214,7 +214,7 @@ function updateScoreDisplay(score) {
  * Display the recognition results in the UI
  * @param {string} text - The recognized text to display
  */
-function displayRecognitionResults(text) {
+async function displayRecognitionResults(text) {
     const recognitionText = document.getElementById('recognitionText');
     if (recognitionText) {
         if (!text || text.trim() === '') {
@@ -222,15 +222,85 @@ function displayRecognitionResults(text) {
             return;
         }
         
-        // For Arabic mode, display with proper styling
-        if (currentMode === 'arabic') {
-            recognitionText.innerHTML = `<div class="recognition-arabic">${text}</div>`;
-        } else {
-            recognitionText.textContent = text;
-        }
+        // Show the Arabic text first with loading indicator
+        recognitionText.innerHTML = `
+            <div class="recognition-arabic">${text}</div>
+            <div class="recognition-loading">Analyzing your recitation...</div>
+        `;
         
-        // Add appropriate direction class based on current mode
-        recognitionText.classList.toggle('arabic', currentMode === 'arabic');
+        // Add appropriate direction class
+        recognitionText.classList.add('arabic');
+        
+        try {
+            // Get the original text for comparison
+            const originalArabic = currentQuranText ? currentQuranText.arabic : '';
+            const originalTranslation = currentQuranText ? currentQuranText.translation : '';
+            
+            // Use the hardcoded worker URL for analysis
+            const workerUrl = 'https://allah-intelligence-api-proxy.matthewwarrenjackson.workers.dev';
+            
+            const response = await fetch(`${workerUrl}/api/openai/compare`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    messages: [
+                        {
+                            role: "system",
+                            content: "You are an expert in Arabic language and Quranic analysis. Provide a detailed analysis of the user's recitation compared to the original text. Include: 1) Transliteration of the user's recitation, 2) English translation of the user's recitation, 3) Comparison with the original text's meaning, 4) A similarity score from 0 to 100 representing how close the meaning is to the original."
+                        },
+                        {
+                            role: "user",
+                            content: `Analyze this Arabic recitation:\n\nUser's recitation: "${text}"\n\nOriginal text: "${originalArabic}"\n\nOriginal translation: "${originalTranslation}"\n\nProvide the transliteration, translation, meaning comparison, and similarity score.`
+                        }
+                    ],
+                    temperature: 0.3,
+                    max_tokens: 500
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to get analysis of recitation');
+            }
+            
+            const result = await response.json();
+            const content = result.choices[0].message.content;
+            
+            // Extract components from the response
+            const transliterationMatch = content.match(/Transliteration:?\s*([^\n]+)/i);
+            const translationMatch = content.match(/Translation:?\s*([^\n]+)/i);
+            const comparisonMatch = content.match(/Comparison:?\s*([^\n]+(?:\n[^\n]+)*)/i);
+            const scoreMatch = content.match(/(?:Similarity|Meaning) Score:?\s*(\d+)/i);
+            
+            const transliteration = transliterationMatch ? transliterationMatch[1].trim() : 'Transliteration not available';
+            const translation = translationMatch ? translationMatch[1].trim() : 'Translation not available';
+            const comparison = comparisonMatch ? comparisonMatch[1].trim() : 'Comparison not available';
+            const score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+            
+            // Create a color class based on the score
+            let scoreColorClass = '';
+            if (score >= 80) scoreColorClass = 'excellent-score';
+            else if (score >= 60) scoreColorClass = 'good-score';
+            else if (score >= 40) scoreColorClass = 'fair-score';
+            else scoreColorClass = 'poor-score';
+            
+            // Update the recognition text with all components
+            recognitionText.innerHTML = `
+                <div class="recognition-arabic">${text}</div>
+                <div class="recognition-transliteration"><strong>Transliteration:</strong> ${transliteration}</div>
+                <div class="recognition-translation"><strong>Translation:</strong> ${translation}</div>
+                <div class="recognition-comparison"><strong>Meaning Comparison:</strong> ${comparison}</div>
+                <div class="recognition-meaning-score ${scoreColorClass}"><strong>Meaning Similarity:</strong> <span>${score}%</span></div>
+            `;
+        } catch (error) {
+            console.error('Error enhancing recognition results:', error);
+            // Still show the Arabic text even if enhancement fails
+            recognitionText.innerHTML = `
+                <div class="recognition-arabic">${text}</div>
+                <div class="recognition-error">Could not generate complete analysis. Please try again.</div>
+            `;
+        }
     }
 }
 
