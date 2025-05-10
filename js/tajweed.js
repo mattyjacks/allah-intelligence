@@ -109,24 +109,20 @@ function createTajweedLegend() {
  * @returns {Promise<Object>} Analysis results with score and feedback
  */
 async function analyzeTajweedPronunciation(correctText, userRecitation) {
-    // Check if API key is available
-    if (!apiKey) {
-        return {
-            score: 0.5,
-            feedback: 'Please enter your OpenAI API key in the settings for detailed Tajweed analysis.'
-        };
-    }
+    // No need to check for API key since we're using the Cloudflare worker
+    // which handles the API key securely
     
     try {
-        // Prepare request to OpenAI API for Tajweed analysis
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        // Use the hardcoded worker URL
+        const workerUrl = 'https://allah-intelligence-api-proxy.matthewwarrenjackson.workers.dev';
+        
+        // Prepare request to Cloudflare Worker for Tajweed analysis
+        const response = await fetch(`${workerUrl}/api/openai/compare`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: "gpt-4",
                 messages: [
                     {
                         role: "system",
@@ -144,7 +140,7 @@ async function analyzeTajweedPronunciation(correctText, userRecitation) {
                         - Specific Tajweed rules that need improvement
                         - Personalized advice for improvement
                         
-                        Format your response as a JSON object with the following structure:
+                        Format your response as JSON with the following structure:
                         {
                             "score": 0.75,
                             "correctRules": ["idgham", "ghunnah"],
@@ -162,8 +158,8 @@ async function analyzeTajweedPronunciation(correctText, userRecitation) {
                     }
                 ],
                 temperature: 0.3,
-                max_tokens: 500,
-                response_format: { type: "json_object" }
+                max_tokens: 500
+                // Removed response_format to avoid the error
             })
         });
         
@@ -174,7 +170,44 @@ async function analyzeTajweedPronunciation(correctText, userRecitation) {
         
         // Parse the analysis result
         const result = await response.json();
-        const analysis = JSON.parse(result.choices[0].message.content);
+        let analysis;
+        
+        try {
+            // The response from the Cloudflare worker will be different
+            // It will have the OpenAI response structure
+            const content = result.choices[0].message.content;
+            
+            // Try to parse the content as JSON
+            try {
+                // If it's already a valid JSON string
+                analysis = JSON.parse(content);
+            } catch (parseError) {
+                // If it's not valid JSON, try to extract JSON from the text
+                const jsonMatch = content.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    analysis = JSON.parse(jsonMatch[0]);
+                } else {
+                    // Fallback to a simple object if no JSON can be extracted
+                    analysis = {
+                        score: 0.6,
+                        feedback: content,
+                        correctRules: [],
+                        improvementNeeded: [],
+                        specificAdvice: 'Please try again for more specific feedback.'
+                    };
+                }
+            }
+        } catch (error) {
+            console.error('Error parsing Tajweed analysis:', error);
+            // Provide a fallback analysis
+            analysis = {
+                score: 0.5,
+                feedback: 'Unable to analyze Tajweed rules in detail.',
+                correctRules: [],
+                improvementNeeded: [],
+                specificAdvice: 'Please try again with a clearer recitation.'
+            };
+        }
         
         return analysis;
         
