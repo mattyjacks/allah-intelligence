@@ -20,22 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSettings = document.getElementById('closeSettings');
     
     if (settingsToggle && settingsPanel && closeSettings) {
-        settingsToggle.addEventListener('click', function() {
-            settingsPanel.classList.add('active');
-            // Hide settings hint when settings panel is opened
-            if (settingsHint) {
-                settingsHint.style.display = 'none';
-                localStorage.setItem('settingsHintDismissed', 'true');
-            }
-        });
-        
-        closeSettings.addEventListener('click', function() {
-            settingsPanel.classList.remove('active');
-        });
-        
         // Create and show settings hint if not previously dismissed
+        let settingsHint = null;
         if (localStorage.getItem('settingsHintDismissed') !== 'true') {
-            const settingsHint = document.createElement('div');
+            settingsHint = document.createElement('div');
             settingsHint.className = 'settings-hint';
             settingsHint.innerHTML = `
                 <div class="settings-hint-arrow"></div>
@@ -52,6 +40,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('settingsHintDismissed', 'true');
             });
         }
+        
+        settingsToggle.addEventListener('click', function() {
+            settingsPanel.classList.add('active');
+            // Hide settings hint when settings panel is opened
+            if (settingsHint) {
+                settingsHint.style.display = 'none';
+                localStorage.setItem('settingsHintDismissed', 'true');
+            }
+        });
+        
+        closeSettings.addEventListener('click', function() {
+            settingsPanel.classList.remove('active');
+        });
+        
+        // Moved to before the click handler
     }
     
     // Transcription area toggle functionality
@@ -398,13 +401,30 @@ function toggleRecording() {
  * Display feedback to the user
  */
 function showFeedback(message, type) {
-    const feedback = document.getElementById('apiKeyFeedback');
+    // Create a temporary feedback element if needed
+    let feedback = document.getElementById('feedbackMessage');
+    
+    if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.id = 'feedbackMessage';
+        feedback.className = 'feedback-toast';
+        document.body.appendChild(feedback);
+    }
+    
     feedback.textContent = message;
-    feedback.className = 'feedback';
+    feedback.className = 'feedback-toast';
     
     if (type) {
         feedback.classList.add(type);
     }
+    
+    // Show the feedback
+    feedback.classList.add('visible');
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        feedback.classList.remove('visible');
+    }, 3000);
 }
 
 /**
