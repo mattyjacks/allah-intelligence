@@ -14,7 +14,7 @@
  */
 async function processAudioWithOpenAI(audioBlob) {
     try {
-        showFeedback('Processing your recitation with OpenAI...', '');
+        showFeedback('Processing your recitation as Arabic with OpenAI...', '');
         
         // Create FormData object for file upload
         const formData = new FormData();

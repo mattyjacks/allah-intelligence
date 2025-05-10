@@ -114,6 +114,8 @@ async function handleOpenAITranscription(request, env) {
   openAIFormData.append('file', audioFile);
   openAIFormData.append('model', 'whisper-1');
   openAIFormData.append('response_format', 'text'); // Using text format for simplicity
+  openAIFormData.append('language', 'ar'); // Force Arabic language interpretation
+  openAIFormData.append('prompt', 'هذا نص باللغة العربية. أرجو تفريغه بدقة بالحروف العربية.'); // Prompt to encourage Arabic script output
 
   // Forward the request to OpenAI
   const openAIResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
