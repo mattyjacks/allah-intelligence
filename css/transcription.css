@@ -1,0 +1,101 @@
+/**
+ * Allah Intelligence - Quran Teaching Tool
+ * Transcription Service Styles
+ */
+
+/* Transcription Service Toggle */
+#transcriptionServiceToggle {
+    margin-bottom: 1rem;
+}
+
+.service-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.service-btn.active {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+.service-btn:hover:not(.active) {
+    background-color: #e0e0e0;
+}
+
+/* Recognition Text Styling */
+.recognition-arabic {
+    font-size: 1.5rem;
+    direction: rtl;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.recognition-transliteration {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.recognition-translation {
+    color: #333;
+}
+
+.recognition-loading {
+    font-style: italic;
+    color: #666;
+    margin: 0.5rem 0;
+}
+
+.recognition-error {
+    color: #f44336;
+    font-style: italic;
+}
+
+.no-results {
+    color: #f44336;
+    font-style: italic;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .service-btn {
+    background-color: #333;
+    border-color: #555;
+    color: #eee;
+}
+
+[data-theme="dark"] .service-btn.active {
+    background-color: #388E3C;
+    border-color: #388E3C;
+}
+
+[data-theme="dark"] .service-btn:hover:not(.active) {
+    background-color: #444;
+}
+
+[data-theme="dark"] .recognition-transliteration {
+    color: #aaa;
+}
+
+[data-theme="dark"] .recognition-translation {
+    color: #ddd;
+}
+
+[data-theme="dark"] .recognition-loading {
+    color: #aaa;
+}
+
+[data-theme="dark"] .recognition-error {
+    color: #ef5350;
+}
+
+[data-theme="dark"] .no-results {
+    color: #ef5350;
+}

@@ -13,35 +13,25 @@
  * @param {Blob} audioBlob - The recorded audio blob
  */
 async function processAudioWithOpenAI(audioBlob) {
-    // Check if API key is available
-    if (!apiKey) {
-        showFeedback('Please enter your OpenAI API key in the settings', 'error');
-        return;
-    }
-    
     try {
-        showFeedback('Processing your recitation...', '');
+        showFeedback('Processing your recitation with OpenAI...', '');
         
         // Create FormData object for file upload
         const formData = new FormData();
         formData.append('file', audioBlob, 'recording.wav');
-        formData.append('model', 'whisper-1');
-        formData.append('response_format', 'text');
         
-        // Prepare request to OpenAI API
-        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        // Use the hardcoded worker URL
+        const workerUrl = 'https://allah-intelligence-api-proxy.matthewwarrenjackson.workers.dev';
+        
+        // Send the audio to the Cloudflare Worker
+        const response = await fetch(`${workerUrl}/api/openai/transcribe`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`
-                // Note: Do not set Content-Type header when using FormData
-                // The browser will set it automatically with the correct boundary
-            },
             body: formData
         });
         
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error?.message || 'Error processing audio');
+            throw new Error(error.error || 'Error processing audio');
         }
         
         // Get transcription
@@ -71,15 +61,16 @@ async function compareWithQuranText(transcription) {
         let score = 0.5; // Default score
         let tajweedAnalysis = null;
         
+        // Use the hardcoded worker URL
+        const workerUrl = 'https://allah-intelligence-api-proxy.matthewwarrenjackson.workers.dev';
+        
         // First, get basic pronunciation score
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch(`${workerUrl}/api/openai/compare`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: "gpt-3.5-turbo",
                 messages: [
                     {
                         role: "system",
@@ -223,7 +214,17 @@ function updateScoreDisplay(score) {
 function displayRecognitionResults(text) {
     const recognitionText = document.getElementById('recognitionText');
     if (recognitionText) {
-        recognitionText.textContent = text;
+        if (!text || text.trim() === '') {
+            recognitionText.innerHTML = '<p class="no-results">No speech detected. Please try again.</p>';
+            return;
+        }
+        
+        // For Arabic mode, display with proper styling
+        if (currentMode === 'arabic') {
+            recognitionText.innerHTML = `<div class="recognition-arabic">${text}</div>`;
+        } else {
+            recognitionText.textContent = text;
+        }
         
         // Add appropriate direction class based on current mode
         recognitionText.classList.toggle('arabic', currentMode === 'arabic');
@@ -237,36 +238,31 @@ function displayRecognitionResults(text) {
  * @returns {Promise<string>} URL to the generated audio
  */
 async function generateSpeech(text, voice = 'nova') {
-    // Check if API key is available
-    if (!apiKey) {
-        showFeedback('Please enter your OpenAI API key in the settings', 'error');
-        return null;
-    }
-    
     try {
-        showFeedback('Generating speech...', '');
+        // Show processing feedback
+        showFeedback('Generating audio...', '');
         
-        // Prepare request to OpenAI API
-        const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        // Use the hardcoded worker URL
+        const workerUrl = 'https://allah-intelligence-api-proxy.matthewwarrenjackson.workers.dev';
+        
+        // Prepare request to Cloudflare Worker
+        const response = await fetch(`${workerUrl}/api/openai/tts`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'tts-1',
-                voice: voice,
-                input: text,
-                speed: 0.9 // Slightly slower for better pronunciation of Quranic text
+                text: text,
+                voice: voice
             })
         });
         
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error?.message || 'Error generating speech');
+            throw new Error(error.error || 'Error generating speech');
         }
         
-        // Get audio blob
+        // Get audio data as blob
         const audioBlob = await response.blob();
         
         // Create URL for the audio blob

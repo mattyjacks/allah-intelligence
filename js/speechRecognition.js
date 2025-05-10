@@ -10,6 +10,7 @@ let recordedAudioUrl = null;
 let mediaRecorder = null;
 let audioChunks = [];
 let audioPlayer = null;
+let transcriptionService = 'openai'; // Default to OpenAI, can be 'openai' or 'assemblyai'
 
 /**
  * Initialize the speech recognition
@@ -93,7 +94,12 @@ function startRecording() {
                 
                 // Process the recorded audio
                 if (currentMode === 'arabic') {
-                    processAudioWithOpenAI(audioBlob);
+                    // Use the selected transcription service
+                    if (transcriptionService === 'assemblyai') {
+                        processAudioWithAssemblyAI(audioBlob);
+                    } else {
+                        processAudioWithOpenAI(audioBlob);
+                    }
                 } else {
                     // For English mode, use the built-in speech recognition
                     recognition.start();
@@ -192,6 +198,75 @@ function playRecordedAudio() {
     
     // Play the audio
     audioPlayer.play();
+}
+
+/**
+ * Set the transcription service to use
+ * @param {string} service - The service to use ('openai' or 'assemblyai')
+ */
+function setTranscriptionService(service) {
+    if (service === 'openai' || service === 'assemblyai') {
+        transcriptionService = service;
+        localStorage.setItem('transcription_service', service);
+        
+        // Update UI to show the active service
+        const openaiBtn = document.getElementById('openaiServiceBtn');
+        const assemblyaiBtn = document.getElementById('assemblyaiServiceBtn');
+        
+        if (openaiBtn && assemblyaiBtn) {
+            openaiBtn.classList.toggle('active', service === 'openai');
+            assemblyaiBtn.classList.toggle('active', service === 'assemblyai');
+        }
+        
+        showFeedback(`Transcription service set to ${service === 'openai' ? 'OpenAI' : 'AssemblyAI'}`, 'success');
+    } else {
+        showFeedback('Invalid transcription service', 'error');
+    }
+}
+
+/**
+ * Initialize the transcription service from saved preferences
+ */
+function initTranscriptionService() {
+    const savedService = localStorage.getItem('transcription_service');
+    if (savedService) {
+        transcriptionService = savedService;
+    }
+    
+    // Create transcription service buttons if they don't exist
+    if (!document.getElementById('transcriptionServiceToggle')) {
+        const interactionArea = document.querySelector('.interaction-area');
+        if (interactionArea) {
+            const serviceToggle = document.createElement('div');
+            serviceToggle.id = 'transcriptionServiceToggle';
+            serviceToggle.className = 'interaction-row';
+            serviceToggle.innerHTML = `
+                <div class="interaction-card">
+                    <h3 class="section-title"><i class="fas fa-cogs"></i> Transcription Service</h3>
+                    <div class="button-row">
+                        <button id="openaiServiceBtn" class="service-btn ${transcriptionService === 'openai' ? 'active' : ''}">
+                            <i class="fas fa-brain"></i> OpenAI
+                        </button>
+                        <button id="assemblyaiServiceBtn" class="service-btn ${transcriptionService === 'assemblyai' ? 'active' : ''}">
+                            <i class="fas fa-language"></i> AssemblyAI
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Insert after the first interaction card
+            const firstCard = interactionArea.querySelector('.interaction-card');
+            if (firstCard) {
+                firstCard.parentNode.insertBefore(serviceToggle, firstCard.nextSibling);
+            } else {
+                interactionArea.appendChild(serviceToggle);
+            }
+            
+            // Add event listeners
+            document.getElementById('openaiServiceBtn').addEventListener('click', () => setTranscriptionService('openai'));
+            document.getElementById('assemblyaiServiceBtn').addEventListener('click', () => setTranscriptionService('assemblyai'));
+        }
+    }
 }
 
 /**

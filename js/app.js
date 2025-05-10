@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showFeedback('Please enter a valid API key', 'error');
         }
     });
+    
+
 });
 
 /**
@@ -113,6 +115,13 @@ function initApp() {
     apiKey = localStorage.getItem('openai_api_key') || '';
     if (apiKey) {
         document.getElementById('apiKey').value = apiKey;
+    }
+    
+
+    
+    // Initialize transcription service
+    if (typeof initTranscriptionService === 'function') {
+        initTranscriptionService();
     }
     
     // Load initial Quran text
