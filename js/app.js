@@ -11,6 +11,7 @@ let currentQuranText = null;
 let currentScore = 0;
 let apiKey = '';
 let recordedAudio = null;
+let voiceGender = 'female'; // 'female' or 'male'
 
 // DOM Elements
 document.addEventListener('DOMContentLoaded', () => {
@@ -150,8 +151,60 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // API key handling removed - now handled through Cloudflare worker
     
-
+    // Voice gender toggle
+    const voiceGenderToggle = document.getElementById('voiceGenderToggle');
+    if (voiceGenderToggle) {
+        // Load saved preference
+        const savedVoiceGender = localStorage.getItem('voice_gender');
+        if (savedVoiceGender) {
+            voiceGender = savedVoiceGender;
+            
+            // Update UI
+            const femaleBtn = voiceGenderToggle.querySelector('[data-service="female"]');
+            const maleBtn = voiceGenderToggle.querySelector('[data-service="male"]');
+            
+            if (femaleBtn && maleBtn) {
+                femaleBtn.classList.toggle('active', voiceGender === 'female');
+                maleBtn.classList.toggle('active', voiceGender === 'male');
+            }
+        }
+        
+        // Add event listeners
+        voiceGenderToggle.addEventListener('click', (e) => {
+            if (e.target.classList.contains('service-btn')) {
+                const gender = e.target.getAttribute('data-service');
+                setVoiceGender(gender);
+            }
+        });
+    }
 });
+
+/**
+ * Set the voice gender for TTS
+ * @param {string} gender - The gender to use ('female' or 'male')
+ */
+function setVoiceGender(gender) {
+    if (gender === 'female' || gender === 'male') {
+        voiceGender = gender;
+        localStorage.setItem('voice_gender', gender);
+        
+        // Update UI to show the active gender
+        const voiceGenderToggle = document.getElementById('voiceGenderToggle');
+        if (voiceGenderToggle) {
+            const femaleBtn = voiceGenderToggle.querySelector('[data-service="female"]');
+            const maleBtn = voiceGenderToggle.querySelector('[data-service="male"]');
+            
+            if (femaleBtn && maleBtn) {
+                femaleBtn.classList.toggle('active', gender === 'female');
+                maleBtn.classList.toggle('active', gender === 'male');
+            }
+        }
+        
+        showFeedback(`AI voice set to ${gender}`, 'success');
+    } else {
+        showFeedback('Invalid voice gender selection', 'error');
+    }
+}
 
 /**
  * Initialize the application
@@ -280,8 +333,15 @@ async function playCurrentText() {
         currentQuranText.arabic : 
         currentQuranText.translation;
     
-    // Select appropriate voice based on mode
-    const voice = currentMode === 'arabic' ? 'nova' : 'onyx';
+    // Select appropriate voice based on mode and gender preference
+    let voice;
+    if (currentMode === 'arabic') {
+        // For Arabic, use nova (female) or echo (male)
+        voice = voiceGender === 'female' ? 'nova' : 'echo';
+    } else {
+        // For English, use alloy (female) or onyx (male)
+        voice = voiceGender === 'female' ? 'alloy' : 'onyx';
+    }
     
     try {
         // Use OpenAI's TTS API through Cloudflare Worker
