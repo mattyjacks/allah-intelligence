@@ -284,14 +284,7 @@ async function playCurrentText() {
     const voice = currentMode === 'arabic' ? 'nova' : 'onyx';
     
     try {
-        // Check if API key is available
-        if (!apiKey) {
-            // Fallback to Web Speech API if no API key
-            useWebSpeechAPI(textToSpeak);
-            return;
-        }
-        
-        // Use OpenAI's TTS API
+        // Use OpenAI's TTS API through Cloudflare Worker
         const audioUrl = await generateSpeech(textToSpeak, voice);
         
         if (audioUrl) {
